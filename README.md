@@ -14,10 +14,10 @@ Versi ringan dari Botlokal yang hanya menggunakan fitur WhatsApp tanpa web inter
 apt install git curl -y
 ```
 ```
-git clone https://github.com/alijayanet/whatsapp
+git clone https://github.com/alijayanet/portal-wa
 ```
 ```
-cd whatsapp
+cd portal-wa
 ```
 ### 1. Install Dependensi
 
