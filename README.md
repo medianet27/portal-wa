@@ -1,4 +1,4 @@
-# Botlokal WhatsApp
+# WhatsAppBot Webportal Pelanggan Saja
 
 Versi ringan dari Botlokal yang hanya menggunakan fitur WhatsApp webportal pelanggan saja
 
