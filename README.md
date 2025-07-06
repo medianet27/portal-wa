@@ -37,7 +37,7 @@ Edit file `.env` dengan pengaturan yang sesuai:
 
 ```
 # Konfigurasi Server
-PORT=4500 (jika sudah dipake ganti)
+PORT=4555 (jika sudah dipake ganti)
 HOST=localhost
 
 # Konfigurasi Admin
@@ -62,11 +62,13 @@ WHATSAPP_SESSION_PATH=./whatsapp-session
 WHATSAPP_KEEP_ALIVE=true
 WHATSAPP_RESTART_ON_ERROR=true
 ```
+# setting juga file settings.json 
+samakan dengan env
 
 ### 3. Menjalankan Aplikasi
 
 ```bash
-node app-whatsapp-only.js
+npm start
 ```
 
 Scan QR code yang muncul di terminal untuk login WhatsApp.<br>
@@ -74,7 +76,7 @@ setelah di scan tinggal jalankan dengan PM2
 ```bash
 pm2 start app-whatsapp-only.js
 ```
-
+# webportal pelanggan : ipserver:4555
 ## Perintah WhatsApp
 
 ### Perintah untuk Pelanggan
