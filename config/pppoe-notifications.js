@@ -14,8 +14,6 @@ const defaultSettings = {
     logoutNotifications: true,
     includeOfflineList: true,
     maxOfflineListCount: 20,
-    adminNumbers: [], // Nomor admin yang akan menerima notifikasi
-    technicianNumbers: [], // Nomor teknisi yang akan menerima notifikasi
     monitorInterval: 60000, // 1 menit
     lastActiveUsers: []
 };
@@ -85,50 +83,112 @@ function setLogoutNotifications(enabled) {
     return updateSettings({ logoutNotifications: enabled });
 }
 
-// Set admin numbers
-function setAdminNumbers(numbers) {
-    const adminNumbers = Array.isArray(numbers) ? numbers : [numbers];
-    return updateSettings({ adminNumbers });
+// Get admin numbers from settings.json
+function getAdminNumbers() {
+    try {
+        const settingsPath = path.join(__dirname, '..', 'settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        return settings.admins || [];
+    } catch (error) {
+        logger.error(`Error getting admin numbers: ${error.message}`);
+        return [];
+    }
 }
 
-// Set technician numbers
-function setTechnicianNumbers(numbers) {
-    const technicianNumbers = Array.isArray(numbers) ? numbers : [numbers];
-    return updateSettings({ technicianNumbers });
+// Get technician numbers from settings.json
+function getTechnicianNumbers() {
+    try {
+        const settingsPath = path.join(__dirname, '..', 'settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        return settings.technician_numbers || [];
+    } catch (error) {
+        logger.error(`Error getting technician numbers: ${error.message}`);
+        return [];
+    }
 }
 
-// Add admin number
+// Add admin number to settings.json
 function addAdminNumber(number) {
-    const settings = loadSettings();
-    if (!settings.adminNumbers.includes(number)) {
-        settings.adminNumbers.push(number);
-        return saveSettings(settings);
+    try {
+        const settingsPath = path.join(__dirname, '..', 'settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        
+        if (!settings.admins) {
+            settings.admins = [];
+        }
+        
+        if (!settings.admins.includes(number)) {
+            settings.admins.push(number);
+            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+            logger.info(`Admin number added to settings.json: ${number}`);
+            return true;
+        }
+        return true; // Already exists
+    } catch (error) {
+        logger.error(`Error adding admin number: ${error.message}`);
+        return false;
     }
-    return true;
 }
 
-// Add technician number
+// Add technician number to settings.json
 function addTechnicianNumber(number) {
-    const settings = loadSettings();
-    if (!settings.technicianNumbers.includes(number)) {
-        settings.technicianNumbers.push(number);
-        return saveSettings(settings);
+    try {
+        const settingsPath = path.join(__dirname, '..', 'settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        
+        if (!settings.technician_numbers) {
+            settings.technician_numbers = [];
+        }
+        
+        if (!settings.technician_numbers.includes(number)) {
+            settings.technician_numbers.push(number);
+            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+            logger.info(`Technician number added to settings.json: ${number}`);
+            return true;
+        }
+        return true; // Already exists
+    } catch (error) {
+        logger.error(`Error adding technician number: ${error.message}`);
+        return false;
     }
-    return true;
 }
 
-// Remove admin number
+// Remove admin number from settings.json
 function removeAdminNumber(number) {
-    const settings = loadSettings();
-    settings.adminNumbers = settings.adminNumbers.filter(n => n !== number);
-    return saveSettings(settings);
+    try {
+        const settingsPath = path.join(__dirname, '..', 'settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        
+        if (settings.admins) {
+            settings.admins = settings.admins.filter(n => n !== number);
+            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+            logger.info(`Admin number removed from settings.json: ${number}`);
+            return true;
+        }
+        return true;
+    } catch (error) {
+        logger.error(`Error removing admin number: ${error.message}`);
+        return false;
+    }
 }
 
-// Remove technician number
+// Remove technician number from settings.json
 function removeTechnicianNumber(number) {
-    const settings = loadSettings();
-    settings.technicianNumbers = settings.technicianNumbers.filter(n => n !== number);
-    return saveSettings(settings);
+    try {
+        const settingsPath = path.join(__dirname, '..', 'settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        
+        if (settings.technician_numbers) {
+            settings.technician_numbers = settings.technician_numbers.filter(n => n !== number);
+            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+            logger.info(`Technician number removed from settings.json: ${number}`);
+            return true;
+        }
+        return true;
+    } catch (error) {
+        logger.error(`Error removing technician number: ${error.message}`);
+        return false;
+    }
 }
 
 // Helper function untuk cek koneksi WhatsApp
@@ -201,7 +261,7 @@ async function sendNotification(message) {
         return false;
     }
 
-    const recipients = [...settings.adminNumbers, ...settings.technicianNumbers];
+    const recipients = [...getAdminNumbers(), ...getTechnicianNumbers()];
     const uniqueRecipients = [...new Set(recipients)]; // Remove duplicates
 
     if (uniqueRecipients.length === 0) {
@@ -374,8 +434,8 @@ module.exports = {
     setNotificationStatus,
     setLoginNotifications,
     setLogoutNotifications,
-    setAdminNumbers,
-    setTechnicianNumbers,
+    getAdminNumbers,
+    getTechnicianNumbers,
     addAdminNumber,
     addTechnicianNumber,
     removeAdminNumber,

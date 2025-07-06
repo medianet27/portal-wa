@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= settings && settings.company_header ? settings.company_header : 'Alijaya Network' %></title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-color);
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            color: white;
+            border-radius: 1rem 1rem 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            border: 2px solid #e2e8f0;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1060;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .overlay.show {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="btn btn-primary mobile-menu-btn position-fixed" style="top: 1rem; left: 1rem; z-index: 1060;" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="bi bi-wifi"></i> <%= settings && settings.company_header ? settings.company_header : 'Alijaya' %>
+                        </h4>
+                        <% if (user) { %>
+                            <small class="text-white-50">
+                                <%= (user && user.isAdmin) ? (settings && settings.footer_info ? settings.footer_info : 'Admin Panel') : 'Customer Portal' %>
+                            </small>
+                        <% } %>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <%- include('../partials/sidebar') %>
+                    </ul>
+                    
+                    <!-- System Info -->
+                    <div class="mt-4 p-3 bg-white bg-opacity-10 rounded">
+                        <small class="text-white-50">
+                            <i class="bi bi-info-circle"></i> System Status
+                        </small>
+                        <div class="text-white small">
+                            <div>🟢 Online</div>
+                            <div>Last Update: <%= new Date().toLocaleTimeString() %></div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-gear me-2"></i>Pengaturan Sistem
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="mb-0">
+                                    <i class="bi bi-gear me-2"></i>Konfigurasi Sistem
+                                </h4>
+                                <p class="mb-0 text-white-50">Edit konfigurasi sistem melalui file settings.json</p>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <% for (const key in settings) { %>
+                                        <div class="form-group mb-3">
+                                            <% 
+                                            // Custom labels untuk field tertentu
+                                            let displayLabel = key;
+                                            let helpText = '';
+                                            
+                                            if (key === 'enable_rx_power_warning') {
+                                                displayLabel = 'Peringatan Redaman Tinggi';
+                                                helpText = 'Aktifkan notifikasi peringatan ketika redaman sinyal melebihi batas';
+                                            } else if (key === 'enable_offline_warning') {
+                                                displayLabel = 'Peringatan Perangkat Offline';
+                                                helpText = 'Aktifkan notifikasi peringatan ketika perangkat offline';
+                                            } else if (key === 'rx_power_warning') {
+                                                displayLabel = 'Batas Peringatan Redaman (dBm)';
+                                                helpText = 'Nilai redaman dalam dBm untuk memicu peringatan';
+                                            } else if (key === 'rx_power_critical') {
+                                                displayLabel = 'Batas Kritis Redaman (dBm)';
+                                                helpText = 'Nilai redaman dalam dBm untuk memicu peringatan kritis';
+                                            } else if (key === 'pppoe_monitor_interval') {
+                                                displayLabel = 'Interval Monitoring PPPoE (ms)';
+                                                helpText = 'Interval dalam milidetik untuk monitoring koneksi PPPoE';
+                                            } else if (key === 'otp_expiry_minutes') {
+                                                displayLabel = 'Masa Berlaku OTP (menit)';
+                                                helpText = 'Waktu dalam menit sebelum OTP kadaluarsa';
+                                            } else if (key === 'otp_length') {
+                                                displayLabel = 'Panjang Kode OTP';
+                                                helpText = 'Jumlah digit untuk kode OTP';
+                                            } else if (key === 'whatsapp_header') {
+                                                displayLabel = 'Header Pesan WhatsApp';
+                                                helpText = 'Header yang akan muncul di awal setiap pesan WhatsApp (bisa pakai emoji dan format *bold*)';
+                                            } else if (key === 'whatsapp_footer') {
+                                                displayLabel = 'Footer Pesan WhatsApp';
+                                                helpText = 'Footer yang akan muncul di akhir setiap pesan WhatsApp (bisa pakai emoji dan format _italic_)';
+                                            } else if (key === 'whatsapp_separator') {
+                                                displayLabel = 'Pemisah Pesan WhatsApp';
+                                                helpText = 'Garis pemisah yang akan muncul di antara header dan konten pesan';
+                                            } else if (key === 'company_header') {
+                                                displayLabel = 'Nama Perusahaan';
+                                                helpText = 'Nama perusahaan yang akan ditampilkan di web interface';
+                                            } else if (key === 'footer_info') {
+                                                displayLabel = 'Info Footer Web';
+                                                helpText = 'Informasi yang akan ditampilkan di footer web interface';
+                                            }
+                                            %>
+                                            
+                                            <label class="form-label fw-bold text-dark">
+                                                <%= displayLabel %>
+                                                <% if (helpText) { %>
+                                                    <i class="bi bi-question-circle text-muted ms-1" 
+                                                       data-bs-toggle="tooltip" 
+                                                       data-bs-placement="top" 
+                                                       title="<%= helpText %>"></i>
+                                                <% } %>
+                                            </label>
+                                            
+                                            <% if (typeof settings[key] === 'boolean') { %>
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="<%= key %>" id="<%= key %>" <%= settings[key] ? 'checked' : '' %> />
+                                                    <label class="form-check-label" for="<%= key %>">
+                                                        <%= settings[key] ? 'Aktif' : 'Nonaktif' %>
+                                                    </label>
+                                                </div>
+                                            <% } else if (Array.isArray(settings[key]) || typeof settings[key] === 'object') { %>
+                                                <textarea name="<%= key %>" class="form-control" rows="3" placeholder="Masukkan JSON array atau object"><%= JSON.stringify(settings[key], null, 2) %></textarea>
+                                                <small class="form-text text-muted">Format JSON untuk array atau object</small>
+                                            <% } else { %>
+                                                <% if (key.includes('whatsapp_') || key === 'company_header' || key === 'footer_info') { %>
+                                                    <textarea name="<%= key %>" class="form-control" rows="2" placeholder="Masukkan teks..."><%= settings[key] %></textarea>
+                                                    <small class="form-text text-muted">
+                                                        <% if (key === 'whatsapp_header') { %>
+                                                            💡 Tips: Gunakan *teks* untuk bold, _teks_ untuk italic, dan emoji 🎉
+                                                        <% } else if (key === 'whatsapp_footer') { %>
+                                                            💡 Tips: Gunakan _teks_ untuk italic dan emoji untuk tampilan menarik
+                                                        <% } else if (key === 'whatsapp_separator') { %>
+                                                            💡 Tips: Gunakan karakter ━━ atau ══ untuk garis pemisah
+                                                        <% } %>
+                                                    </small>
+                                                <% } else { %>
+                                                    <input type="text" name="<%= key %>" value="<%= settings[key] %>" class="form-control" />
+                                                <% } %>
+                                            <% } %>
+                                            
+                                            <% if (helpText) { %>
+                                                <small class="form-text text-muted"><%= helpText %></small>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>Simpan Pengaturan
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="location.reload()">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <div id="settingsMsg" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        // Form submission
+        document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Menyimpan...';
+            submitBtn.disabled = true;
+            
+            const form = e.target;
+            const data = {};
+            
+            for (const el of form.elements) {
+                if (!el.name) continue;
+                
+                if (el.type === 'checkbox') {
+                    data[el.name] = el.checked;
+                } else if (el.tagName === 'TEXTAREA') {
+                    try {
+                        data[el.name] = JSON.parse(el.value);
+                    } catch (error) {
+                        // Jika bukan JSON valid, simpan sebagai string
+                        data[el.name] = el.value;
+                    }
+                } else {
+                    data[el.name] = el.value;
+                }
+            }
+            
+            try {
+                const res = await fetch('/admin/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await res.json();
+                const msgDiv = document.getElementById('settingsMsg');
+                
+                if (result.success) {
+                    msgDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>✅ Pengaturan berhasil disimpan! Perubahan akan diterapkan segera.</div>';
+                } else {
+                    msgDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>❌ Gagal menyimpan: ' + result.error + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('settingsMsg').innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>❌ Error: ' + error.message + '</div>';
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Set active nav item
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html> 

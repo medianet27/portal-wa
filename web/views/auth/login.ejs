@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= settings && settings.company_header ? settings.company_header : 'Alijaya Network' %></title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+            margin: 1rem;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .login-body {
+            padding: 2rem;
+        }
+        
+        .form-control {
+            border-radius: 0.75rem;
+            border: 2px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+        
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .alert {
+            border-radius: 0.75rem;
+            border: none;
+        }
+        
+        .type-switch {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .type-switch button {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .type-switch button.active {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .input-group-text {
+            border-radius: 0.75rem 0 0 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-right: none;
+            background: #f8fafc;
+        }
+        
+        .input-group .form-control {
+            border-radius: 0 0.75rem 0.75rem 0;
+            border-left: none;
+        }
+        
+        .input-group:focus-within .input-group-text {
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h3 class="mb-0">
+                <i class="bi bi-wifi"></i> <%= settings && settings.company_header ? settings.company_header : 'Alijaya Network' %>
+            </h3>
+            <p class="mb-0 mt-2 opacity-75">
+                <%= type === 'admin' ? 'Admin Login' : 'Customer Portal' %>
+            </p>
+
+        </div>
+        
+        <div class="login-body">
+            <!-- Type Switch -->
+            <div class="type-switch">
+                <button type="button" class="<%= type === 'customer' ? 'active' : '' %>" onclick="switchType('customer')">
+                    <i class="bi bi-person"></i> Customer
+                </button>
+                <button type="button" class="<%= type === 'admin' ? 'active' : '' %>" onclick="switchType('admin')">
+                    <i class="bi bi-shield-check"></i> Admin
+                </button>
+            </div>
+            
+            <!-- Error Alert -->
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <%= error %>
+                </div>
+            <% } %>
+            
+            <!-- Login Form -->
+            <form action="/auth/login" method="POST">
+                <input type="hidden" name="type" value="<%= type %>">
+                <input type="hidden" name="redirect" value="<%= redirect %>">
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">
+                        <%= type === 'admin' ? 'Username' : 'Phone Number' %>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-<%= type === 'admin' ? 'person' : 'phone' %>"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="username" 
+                            name="username" 
+                            placeholder="<%= type === 'admin' ? 'Enter username' : 'Enter phone number' %>"
+                            required
+                            autocomplete="username"
+                        >
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        <input 
+                            type="password" 
+                            class="form-control" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Enter password"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </button>
+            </form>
+            
+            <!-- Help Text -->
+            <div class="text-center">
+                <small class="text-muted">
+                    <% if (type === 'customer') { %>
+                        <i class="bi bi-info-circle"></i> Use your phone number and default password
+                    <% } else { %>
+                        <i class="bi bi-info-circle"></i> Admin access only
+                    <% } %>
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function switchType(newType) {
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('type', newType);
+            window.location.href = currentUrl.toString();
+        }
+        
+        // Auto-focus on username field
+        document.getElementById('username').focus();
+        
+        // Phone number formatting for customer login
+        if ('<%= type %>' === 'customer') {
+            const phoneInput = document.getElementById('username');
+            phoneInput.addEventListener('input', function(e) {
+                // Remove non-numeric characters
+                let value = e.target.value.replace(/\D/g, '');
+                
+                // Limit to reasonable phone number length
+                if (value.length > 15) {
+                    value = value.substring(0, 15);
+                }
+                
+                e.target.value = value;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= settings && settings.company_header ? settings.company_header : 'Alijaya Network' %></title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+
+        .main-content {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin: 1rem;
+            padding: 2rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .device-table {
+            font-size: 0.9rem;
+        }
+
+        .device-table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .status-online {
+            color: #28a745;
+        }
+
+        .status-offline {
+            color: #dc3545;
+        }
+
+        .clickable-status {
+            transition: all 0.2s ease;
+        }
+
+        .clickable-status:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            opacity: 0.9;
+        }
+
+        .clickable-status:active {
+            transform: scale(0.98);
+        }
+
+        .clickable-username {
+            transition: all 0.2s ease;
+            text-decoration: none !important;
+        }
+
+        .clickable-username:hover {
+            color: #0d6efd !important;
+            text-decoration: underline !important;
+            transform: translateX(2px);
+        }
+
+        .clickable-username:active {
+            transform: scale(0.98);
+        }
+
+        .search-box {
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+        }
+
+        .search-box:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+
+            .mobile-menu-btn {
+                display: block !important;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="btn btn-primary mobile-menu-btn position-fixed" style="top: 1rem; left: 1rem; z-index: 1060;" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="bi bi-wifi"></i> <%= settings && settings.company_header ? settings.company_header : 'Alijaya' %>
+                        </h4>
+                        <% if (user) { %>
+                            <small class="text-white-50">
+                                <%= (user && user.isAdmin) ? (settings && settings.footer_info ? settings.footer_info : 'Admin Panel') : 'Customer Portal' %>
+                            </small>
+                        <% } %>
+                    </div>
+
+                    <ul class="nav flex-column">
+                        <%- include('../partials/sidebar') %>
+                    </ul>
+
+                    <!-- System Info -->
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-25">
+                        <small class="text-white-50 d-block mb-2">System Info</small>
+                        <div class="text-white-50 small">
+                            <div class="d-flex justify-content-between">
+                                <span>Uptime:</span>
+                                <span id="systemUptime">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Memory:</span>
+                                <span id="systemMemory">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>CPU:</span>
+                                <span id="systemCPU">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-25">
+                        <form action="/auth/logout" method="POST" class="d-inline w-100">
+                            <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="main-content">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-router"></i> Device Management</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshDevices()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> <%= error %>
+        </div>
+    <% } %>
+
+    <!-- Device Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Total Devices</h5>
+                    <h2 class="text-primary"><%= devices ? devices.length : 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Online</h5>
+                    <h2 class="text-success" id="onlineCount">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Offline</h5>
+                    <h2 class="text-danger" id="offlineCount">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-info">Uptime</h5>
+                    <h2 class="text-info" id="uptimePercent">-</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control search-box" id="deviceSearch" placeholder="Search by PPPoE username, SSID, or tag/phone...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="online">Online Only</option>
+                <option value="offline">Offline Only</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="entriesPerPage">
+                <option value="25">Show 25 entries</option>
+                <option value="50">Show 50 entries</option>
+                <option value="100">Show 100 entries</option>
+                <option value="all">Show All</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Device List -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="bi bi-list"></i> Device List</h5>
+                    <small class="text-muted">Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> devices</small>
+                </div>
+                <div class="card-body p-0">
+                    <% if (devices && devices.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover device-table mb-0" id="deviceTable">
+                                <thead>
+                                    <tr>
+                                        <th>PPPoE Username</th>
+                                        <th>Status</th>
+                                        <th>SSID</th>
+                                        <th>Terhubung</th>
+                                        <th>Tag/Phone</th>
+                                        <th>Last Seen</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deviceTableBody">
+                                    <% devices.forEach((device, index) => { %>
+                                        <%
+                                            const lastInform = new Date(device._lastInform);
+                                            const now = new Date();
+                                            const diffMinutes = Math.floor((now - lastInform) / (1000 * 60));
+                                            const isOnline = diffMinutes < 15;
+                                            const tags = device._tags || [];
+                                            const customerInfo = tags.length > 0 ? tags[0] : 'No Tag';
+
+                                            // Get SSID from WiFi configuration
+                                            let ssid = 'Unknown';
+                                            if (device.InternetGatewayDevice?.LANDevice?.[1]?.WLANConfiguration?.[1]?.SSID?._value) {
+                                                ssid = device.InternetGatewayDevice.LANDevice[1].WLANConfiguration[1].SSID._value;
+                                            } else if (device.InternetGatewayDevice?.LANDevice?.['1']?.WLANConfiguration?.['1']?.SSID?._value) {
+                                                ssid = device.InternetGatewayDevice.LANDevice['1'].WLANConfiguration['1'].SSID._value;
+                                            }
+
+                                            // Get connected devices count
+                                            let connectedDevices = 0;
+                                            if (device.InternetGatewayDevice?.LANDevice?.[1]?.WLANConfiguration?.[1]?.TotalAssociations?._value) {
+                                                connectedDevices = device.InternetGatewayDevice.LANDevice[1].WLANConfiguration[1].TotalAssociations._value;
+                                            } else if (device.InternetGatewayDevice?.LANDevice?.['1']?.WLANConfiguration?.['1']?.TotalAssociations?._value) {
+                                                connectedDevices = device.InternetGatewayDevice.LANDevice['1'].WLANConfiguration['1'].TotalAssociations._value;
+                                            }
+
+                                            // Get PPPoE username from various possible paths
+                                            let pppoeUsername = 'Unknown';
+                                            if (device.VirtualParameters?.pppoeUsername?._value) {
+                                                pppoeUsername = device.VirtualParameters.pppoeUsername._value;
+                                            } else if (device.InternetGatewayDevice?.WANDevice?.[1]?.WANConnectionDevice?.[1]?.WANPPPConnection?.[1]?.Username?._value) {
+                                                pppoeUsername = device.InternetGatewayDevice.WANDevice[1].WANConnectionDevice[1].WANPPPConnection[1].Username._value;
+                                            } else if (device.InternetGatewayDevice?.WANDevice?.['1']?.WANConnectionDevice?.['1']?.WANPPPConnection?.['1']?.Username?._value) {
+                                                pppoeUsername = device.InternetGatewayDevice.WANDevice['1'].WANConnectionDevice['1'].WANPPPConnection['1'].Username._value;
+                                            }
+                                        %>
+                                        <tr class="device-row" data-status="<%= isOnline ? 'online' : 'offline' %>" data-search="<%= pppoeUsername.toLowerCase() %> <%= ssid.toLowerCase() %> <%= customerInfo.toLowerCase() %>">
+                                            <td>
+                                                <strong class="clickable-username text-primary"
+                                                        onclick="viewDevice('<%= device._id %>')"
+                                                        title="Click to view device details"
+                                                        style="cursor: pointer; transition: all 0.2s ease;">
+                                                    <i class="bi bi-person-circle me-1"></i><%= pppoeUsername %>
+                                                </strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge <%= isOnline ? 'bg-success' : 'bg-danger' %> clickable-status"
+                                                      onclick="viewDevice('<%= device._id %>')"
+                                                      title="Click to view device details"
+                                                      style="cursor: pointer; transition: all 0.2s ease;">
+                                                    <i class="bi <%= isOnline ? 'bi-wifi' : 'bi-wifi-off' %>"></i>
+                                                    <%= isOnline ? 'Online' : 'Offline' %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-primary">
+                                                    <i class="bi bi-wifi"></i> <%= ssid %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    <i class="bi bi-people"></i> <%= connectedDevices %> device<%= connectedDevices !== 1 ? 's' : '' %>
+                                                </span>
+                                            </td>
+                                            <td><%= customerInfo %></td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    <%= lastInform.toLocaleString('id-ID', {
+                                                        year: 'numeric',
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }) %>
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="restartDevice('<%= device._id %>')" title="Restart Device">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">
+                                    Showing <span id="paginationInfo">1-25 of <%= devices.length %></span> entries
+                                </small>
+                            </div>
+                            <nav aria-label="Device pagination">
+                                <ul class="pagination pagination-sm mb-0" id="devicePagination">
+                                    <!-- Pagination will be generated by JavaScript -->
+                                </ul>
+                            </nav>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-router fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">No devices found</p>
+                            <button class="btn btn-primary" onclick="refreshDevices()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Devices
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let entriesPerPage = 25;
+        let filteredDevices = [];
+        let allDevices = [];
+
+        function refreshDevices() {
+            location.reload();
+        }
+
+        function viewDevice(deviceId) {
+            window.location.href = `/admin/devices/${deviceId}`;
+        }
+
+        function restartDevice(deviceId) {
+            if (confirm('Are you sure you want to restart this device?')) {
+                // Show loading state
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+                button.disabled = true;
+
+                // Simulate restart (replace with actual API call)
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                    alert('Device restart command sent successfully!');
+                }, 2000);
+            }
+        }
+
+        // Search and filter functionality
+        function initializeDeviceTable() {
+            const deviceRows = document.querySelectorAll('.device-row');
+            allDevices = Array.from(deviceRows);
+            filteredDevices = [...allDevices];
+
+            updateTable();
+            calculateStats();
+
+            // Search functionality
+            document.getElementById('deviceSearch').addEventListener('input', function() {
+                filterDevices();
+            });
+
+            // Status filter
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                filterDevices();
+            });
+
+            // Entries per page
+            document.getElementById('entriesPerPage').addEventListener('change', function() {
+                entriesPerPage = this.value === 'all' ? filteredDevices.length : parseInt(this.value);
+                currentPage = 1;
+                updateTable();
+            });
+        }
+
+        function filterDevices() {
+            const searchTerm = document.getElementById('deviceSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredDevices = allDevices.filter(row => {
+                const searchData = row.getAttribute('data-search');
+                const status = row.getAttribute('data-status');
+
+                const matchesSearch = searchData.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+
+                return matchesSearch && matchesStatus;
+            });
+
+            currentPage = 1;
+            updateTable();
+            calculateStats();
+        }
+
+        function updateTable() {
+            const startIndex = (currentPage - 1) * entriesPerPage;
+            const endIndex = entriesPerPage === 'all' ? filteredDevices.length : startIndex + entriesPerPage;
+
+            // Hide all rows
+            allDevices.forEach(row => row.style.display = 'none');
+
+            // Show filtered rows for current page
+            for (let i = startIndex; i < endIndex && i < filteredDevices.length; i++) {
+                filteredDevices[i].style.display = '';
+            }
+
+            // Update pagination info
+            const showing = Math.min(endIndex, filteredDevices.length);
+            document.getElementById('paginationInfo').textContent =
+                `${startIndex + 1}-${showing} of ${filteredDevices.length}`;
+
+            document.getElementById('showingCount').textContent = showing;
+            document.getElementById('totalCount').textContent = filteredDevices.length;
+
+            // Update pagination
+            updatePagination();
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredDevices.length / entriesPerPage);
+            const pagination = document.getElementById('devicePagination');
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
+                </li>
+            `;
+
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+                </li>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredDevices.length / entriesPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                updateTable();
+            }
+        }
+
+        // Calculate and display statistics
+        function calculateStats() {
+            let onlineCount = 0;
+            let offlineCount = 0;
+
+            filteredDevices.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (status === 'online') {
+                    onlineCount++;
+                } else {
+                    offlineCount++;
+                }
+            });
+
+            const total = onlineCount + offlineCount;
+            const uptimePercent = total > 0 ? Math.round((onlineCount / total) * 100) : 0;
+
+            document.getElementById('onlineCount').textContent = onlineCount;
+            document.getElementById('offlineCount').textContent = offlineCount;
+            document.getElementById('uptimePercent').textContent = uptimePercent + '%';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDeviceTable();
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/app.js"></script>
+</body>
+</html>

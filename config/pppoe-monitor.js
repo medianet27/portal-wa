@@ -146,14 +146,17 @@ async function checkPPPoEChanges() {
 // Get monitoring status
 function getMonitoringStatus() {
     const settings = pppoeNotifications.getSettings();
+    const adminNumbers = pppoeNotifications.getAdminNumbers();
+    const technicianNumbers = pppoeNotifications.getTechnicianNumbers();
+    
     return {
         isRunning: isMonitoring,
         notificationsEnabled: settings.enabled,
         loginNotifications: settings.loginNotifications,
         logoutNotifications: settings.logoutNotifications,
         interval: settings.monitorInterval,
-        adminNumbers: settings.adminNumbers,
-        technicianNumbers: settings.technicianNumbers,
+        adminNumbers: adminNumbers,
+        technicianNumbers: technicianNumbers,
         activeConnections: lastActivePPPoE.length
     };
 }

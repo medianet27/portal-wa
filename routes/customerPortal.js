@@ -3,14 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { findDeviceByTag } = require('../config/addWAN');
-const { sendMessage } = require('../config/whatsapp');
+const { sendMessage } = require('../config/sendMessage');
+const { getSettingsWithCache, getSetting } = require('../config/settingsManager');
 const router = express.Router();
-
-// Helper untuk baca settings.json secara dinamis
-function getSettings() {
-  const settingsPath = path.join(__dirname, '../settings.json');
-  return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-}
 
 // Validasi nomor pelanggan ke GenieACS
 async function isValidCustomer(phone) {
@@ -151,9 +146,10 @@ async function updateSSID(phone, newSSID) {
     if (!device) return false;
     const deviceId = device._id;
     const encodedDeviceId = encodeURIComponent(deviceId);
-    const genieacsUrl = process.env.GENIEACS_URL || global.appSettings.genieacsUrl;
-    const username = process.env.GENIEACS_USERNAME || global.appSettings.genieacsUsername;
-    const password = process.env.GENIEACS_PASSWORD || global.appSettings.genieacsPassword;
+    const settings = getSettingsWithCache();
+    const genieacsUrl = settings.genieacs_url || 'http://localhost:7557';
+    const username = settings.genieacs_username || '';
+    const password = settings.genieacs_password || '';
     // Update SSID 2.4GHz
     await axios.post(
       `${genieacsUrl}/devices/${encodedDeviceId}/tasks`,
@@ -202,9 +198,10 @@ async function updatePassword(phone, newPassword) {
     if (!device) return false;
     const deviceId = device._id;
     const encodedDeviceId = encodeURIComponent(deviceId);
-    const genieacsUrl = process.env.GENIEACS_URL || global.appSettings.genieacsUrl;
-    const username = process.env.GENIEACS_USERNAME || global.appSettings.genieacsUsername;
-    const password = process.env.GENIEACS_PASSWORD || global.appSettings.genieacsPassword;
+    const settings = getSettingsWithCache();
+    const genieacsUrl = settings.genieacs_url || 'http://localhost:7557';
+    const username = settings.genieacs_username || '';
+    const password = settings.genieacs_password || '';
     const tasksUrl = `${genieacsUrl}/devices/${encodedDeviceId}/tasks`;
     // Update password 2.4GHz
     await axios.post(tasksUrl, {
@@ -241,17 +238,32 @@ router.get('/login', (req, res) => {
 // POST: Proses login
 router.post('/login', async (req, res) => {
   const { phone } = req.body;
-  const settings = getSettings();
+  const settings = getSettingsWithCache();
   if (!await isValidCustomer(phone)) {
     return res.render('login', { error: 'Nomor HP tidak valid atau belum terdaftar.' });
   }
   if (settings.customerPortalOtp) {
-    // Generate OTP 6 digit
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate OTP sesuai jumlah digit di settings
+    const otpLength = settings.otp_length || 6;
+    const min = Math.pow(10, otpLength - 1);
+    const max = Math.pow(10, otpLength) - 1;
+    const otp = Math.floor(min + Math.random() * (max - min)).toString();
     otpStore[phone] = { otp, expires: Date.now() + 5 * 60 * 1000 };
-    // TODO: Kirim OTP ke WhatsApp pelanggan (integrasi WhatsApp)
-    console.log(`OTP untuk ${phone}: ${otp}`);
-    return res.render('otp', { phone, error: null });
+    
+    // Kirim OTP ke WhatsApp pelanggan
+    try {
+      const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
+      const msg = `🔐 *KODE OTP PORTAL PELANGGAN*\n\n` +
+        `Kode OTP Anda adalah: *${otp}*\n\n` +
+        `⏰ Kode ini berlaku selama 5 menit\n` +
+        `🔒 Jangan bagikan kode ini kepada siapapun`;
+      
+      await sendMessage(waJid, msg);
+      console.log(`OTP berhasil dikirim ke ${phone}: ${otp}`);
+    } catch (error) {
+      console.error(`Gagal mengirim OTP ke ${phone}:`, error);
+    }
+    return res.render('otp', { phone, error: null, otp_length: otpLength });
   } else {
     req.session.phone = phone;
     return res.redirect('/customer/dashboard');
@@ -261,15 +273,17 @@ router.post('/login', async (req, res) => {
 // GET: Halaman OTP
 router.get('/otp', (req, res) => {
   const { phone } = req.query;
-  res.render('otp', { phone, error: null });
+  const settings = getSettingsWithCache();
+  res.render('otp', { phone, error: null, otp_length: settings.otp_length || 6 });
 });
 
 // POST: Verifikasi OTP
 router.post('/otp', (req, res) => {
   const { phone, otp } = req.body;
   const data = otpStore[phone];
+  const settings = getSettingsWithCache();
   if (!data || data.otp !== otp || Date.now() > data.expires) {
-    return res.render('otp', { phone, error: 'OTP salah atau sudah kadaluarsa.' });
+    return res.render('otp', { phone, error: 'OTP salah atau sudah kadaluarsa.', otp_length: settings.otp_length || 6 });
   }
   // Sukses login
   delete otpStore[phone];
@@ -297,7 +311,7 @@ router.post('/change-ssid', async (req, res) => {
     // Kirim notifikasi WhatsApp ke pelanggan
     const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
     const msg = `✅ *PERUBAHAN NAMA WIFI*\n\nNama WiFi Anda telah diubah menjadi:\n• WiFi 2.4GHz: ${ssid}\n• WiFi 5GHz: ${ssid}-5G\n\nSilakan hubungkan ulang perangkat Anda ke WiFi baru.`;
-    try { await sendMessage(waJid, { text: msg }); } catch (e) {}
+    try { await sendMessage(waJid, msg); } catch (e) {}
   }
   const data = await getCustomerDeviceData(phone);
   res.render('dashboard', { customer: data || { phone, ssid: '-', status: '-', lastChange: '-' }, connectedUsers: data ? data.connectedUsers : [], notif: ok ? 'Nama WiFi (SSID) berhasil diubah.' : 'Gagal mengubah SSID.' });
@@ -313,7 +327,7 @@ router.post('/change-password', async (req, res) => {
     // Kirim notifikasi WhatsApp ke pelanggan
     const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
     const msg = `✅ *PERUBAHAN PASSWORD WIFI*\n\nPassword WiFi Anda telah diubah menjadi:\n• Password Baru: ${password}\n\nSilakan hubungkan ulang perangkat Anda dengan password baru.`;
-    try { await sendMessage(waJid, { text: msg }); } catch (e) {}
+    try { await sendMessage(waJid, msg); } catch (e) {}
   }
   const data = await getCustomerDeviceData(phone);
   res.render('dashboard', { customer: data || { phone, ssid: '-', status: '-', lastChange: '-' }, connectedUsers: data ? data.connectedUsers : [], notif: ok ? 'Password WiFi berhasil diubah.' : 'Gagal mengubah password.' });

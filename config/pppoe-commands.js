@@ -162,6 +162,8 @@ async function handlePPPoEStatus(remoteJid) {
     try {
         const status = pppoeMonitor.getMonitoringStatus();
         const settings = pppoeNotifications.getSettings();
+        const adminNumbers = pppoeNotifications.getAdminNumbers();
+        const technicianNumbers = pppoeNotifications.getTechnicianNumbers();
 
         let message = `📊 *STATUS NOTIFIKASI PPPoE*\n\n`;
 
@@ -175,13 +177,13 @@ async function handlePPPoEStatus(remoteJid) {
 
         // Recipients
         message += `📱 *Penerima Notifikasi:*\n`;
-        if (settings.adminNumbers.length > 0) {
-            message += `• Admin (${settings.adminNumbers.length}): ${settings.adminNumbers.join(', ')}\n`;
+        if (adminNumbers.length > 0) {
+            message += `• Admin (${adminNumbers.length}): ${adminNumbers.join(', ')}\n`;
         }
-        if (settings.technicianNumbers.length > 0) {
-            message += `• Teknisi (${settings.technicianNumbers.length}): ${settings.technicianNumbers.join(', ')}\n`;
+        if (technicianNumbers.length > 0) {
+            message += `• Teknisi (${technicianNumbers.length}): ${technicianNumbers.join(', ')}\n`;
         }
-        if (settings.adminNumbers.length === 0 && settings.technicianNumbers.length === 0) {
+        if (adminNumbers.length === 0 && technicianNumbers.length === 0) {
             message += `• Belum ada nomor terdaftar\n`;
         }
 

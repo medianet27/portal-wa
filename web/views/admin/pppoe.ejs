@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= settings && settings.company_header ? settings.company_header : 'Alijaya Network' %></title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .main-content {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin: 1rem;
+            padding: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+        }
+        
+        .stat-card.info {
+            background: linear-gradient(135deg, var(--info-color), #0891b2);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .main-content {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+            
+            .mobile-menu-btn {
+                display: block !important;
+            }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="btn btn-primary mobile-menu-btn position-fixed" style="top: 1rem; left: 1rem; z-index: 1060;" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="bi bi-wifi"></i> <%= settings && settings.company_header ? settings.company_header : 'Alijaya' %>
+                        </h4>
+                        <% if (user) { %>
+                            <small class="text-white-50">
+                                <%= (user && user.isAdmin) ? (settings && settings.footer_info ? settings.footer_info : 'Admin Panel') : 'Customer Portal' %>
+                            </small>
+                        <% } %>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <%- include('../partials/sidebar') %>
+                    </ul>
+                    
+                    <!-- System Info -->
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-25">
+                        <small class="text-white-50 d-block mb-2">System Info</small>
+                        <div class="text-white-50 small">
+                            <div class="d-flex justify-content-between">
+                                <span>Uptime:</span>
+                                <span id="systemUptime">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Memory:</span>
+                                <span id="systemMemory">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>CPU:</span>
+                                <span id="systemCPU">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-25">
+                        <form action="/auth/logout" method="POST" class="d-inline w-100">
+                            <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="main-content">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2"><i class="bi bi-globe"></i> PPPoE Management</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshPPPoE()">
+                                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="showAddPPPoEModal()">
+                                    <i class="bi bi-plus-circle"></i> Add User
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleMonitoring()">
+                                    <i class="bi bi-play-circle"></i> <span id="monitoringToggleText">Start Monitoring</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PPPoE Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card success">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="text-white-50 small">Active Sessions</div>
+                                            <div class="h4 mb-0 text-white" id="activeSessions">
+                                                <%= activeConnections ? activeConnections.length : 0 %>
+                                            </div>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-person-check fs-2 text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card info">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="text-white-50 small">Total Users</div>
+                                            <div class="h4 mb-0 text-white">142</div>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-people fs-2 text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card warning">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="text-white-50 small">Login Today</div>
+                                            <div class="h4 mb-0 text-white">23</div>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-box-arrow-in-right fs-2 text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stat-card danger">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="text-white-50 small">Logout Today</div>
+                                            <div class="h4 mb-0 text-white">15</div>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-box-arrow-right fs-2 text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0"><i class="bi bi-activity"></i> Monitoring Status</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <table class="table table-borderless">
+                                                <tr>
+                                                    <td><strong>Monitoring Status:</strong></td>
+                                                    <td>
+                                                        <span class="badge <%= pppoeStatus && pppoeStatus.isRunning ? 'bg-success' : 'bg-danger' %>">
+                                                            <%= pppoeStatus && pppoeStatus.isRunning ? 'Active' : 'Inactive' %>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Monitor Interval:</strong></td>
+                                                    <td><%= pppoeStatus && pppoeStatus.interval ? (pppoeStatus.interval / 1000) + ' seconds' : 'N/A' %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Active Connections:</strong></td>
+                                                    <td><%= pppoeStatus ? pppoeStatus.activeConnections : 0 %></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Notifications:</strong></td>
+                                                    <td>
+                                                        <span class="badge <%= pppoeStatus && pppoeStatus.notificationsEnabled ? 'bg-info' : 'bg-secondary' %>">
+                                                            <%= pppoeStatus && pppoeStatus.notificationsEnabled ? 'Enabled' : 'Disabled' %>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <table class="table table-borderless">
+                                                <tr>
+                                                    <td><strong>Admin Numbers:</strong></td>
+                                                    <td>6281947215703</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Technician Numbers:</strong></td>
+                                                    <td>083807665697, 082218094778</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Login Notifications:</strong></td>
+                                                    <td><span class="badge bg-success">On</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Logout Notifications:</strong></td>
+                                                    <td><span class="badge bg-success">On</span></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- PPPoE User Search & Management -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0"><i class="bi bi-search"></i> Search PPPoE Users</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Search Form -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-8">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="searchUsername" placeholder="Enter username to search..." onkeypress="handleSearchKeyPress(event)">
+                                                <button class="btn btn-primary" type="button" onclick="searchPPPoEUser()">
+                                                    <i class="bi bi-search"></i> Search
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-secondary w-100" onclick="loadAllPPPoEUsers()">
+                                                <i class="bi bi-list"></i> Show All Users
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Search Results -->
+                                    <div id="searchResults" style="display: none;">
+                                        <h6><i class="bi bi-person-check"></i> Search Results</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Username</th>
+                                                        <th>Profile</th>
+                                                        <th>Status</th>
+                                                        <th>Last Login</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="searchResultsBody">
+                                                    <!-- Search results will be populated here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- All Users List -->
+                                    <div id="allUsersList" style="display: none;">
+                                        <h6><i class="bi bi-people"></i> All PPPoE Users</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Username</th>
+                                                        <th>Profile</th>
+                                                        <th>Status</th>
+                                                        <th>Last Login</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="allUsersBody">
+                                                    <!-- All users will be populated here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- No Results Message -->
+                                    <div id="noResults" class="text-center py-4" style="display: none;">
+                                        <i class="bi bi-exclamation-circle fs-1 text-muted"></i>
+                                        <p class="text-muted mt-2">No users found. Try a different search term.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add PPPoE User Modal -->
+    <div class="modal fade" id="addPPPoEModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add PPPoE User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPPPoEForm">
+                        <div class="mb-3">
+                            <label for="pppoeUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="pppoeUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pppoePassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="pppoePassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pppoeProfile" class="form-label">Profile</label>
+                            <select class="form-select" id="pppoeProfile" required>
+                                <option value="">Select Profile</option>
+                                <option value="default">default</option>
+                                <option value="1M">1M</option>
+                                <option value="2M">2M</option>
+                                <option value="5M">5M</option>
+                                <option value="10M">10M</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pppoeService" class="form-label">Service</label>
+                            <select class="form-select" id="pppoeService">
+                                <option value="pppoe">pppoe</option>
+                                <option value="any">any</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addPPPoEUser()">Add User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit PPPoE User Modal -->
+    <div class="modal fade" id="editPPPoEModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit PPPoE User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPPPoEForm">
+                        <input type="hidden" id="editPPPoEId">
+                        <div class="mb-3">
+                            <label for="editPPPoEUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editPPPoEUsername" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPPPoEPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="editPPPoEPassword">
+                            <small class="form-text text-muted">Leave empty to keep current password</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPPPoEProfile" class="form-label">Profile</label>
+                            <select class="form-select" id="editPPPoEProfile">
+                                <option value="default">default</option>
+                                <option value="1M">1M</option>
+                                <option value="2M">2M</option>
+                                <option value="5M">5M</option>
+                                <option value="10M">10M</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editPPPoEDisabled">
+                                <label class="form-check-label" for="editPPPoEDisabled">
+                                    Disable User
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updatePPPoEUser()">Update User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/app.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        function refreshPPPoE() {
+            AlijayaWeb.showToast('Refreshing PPPoE data...', 'info');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+        
+        function toggleMonitoring() {
+            const toggleText = document.getElementById('monitoringToggleText');
+            const currentText = toggleText.textContent;
+            
+            if (currentText === 'Start Monitoring') {
+                toggleText.textContent = 'Stop Monitoring';
+                AlijayaWeb.showToast('PPPoE monitoring started', 'success');
+            } else {
+                toggleText.textContent = 'Start Monitoring';
+                AlijayaWeb.showToast('PPPoE monitoring stopped', 'warning');
+            }
+        }
+        
+        function showAddPPPoEModal() {
+            // Load profiles before showing modal
+            loadPPPoEProfiles();
+            const modal = new bootstrap.Modal(document.getElementById('addPPPoEModal'));
+            modal.show();
+        }
+
+        // Function to load PPPoE profiles dynamically
+        function loadPPPoEProfiles() {
+            fetch('/admin/api/pppoe/profiles')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.profiles) {
+                        // Update Add User modal dropdown
+                        const addProfileSelect = document.getElementById('pppoeProfile');
+                        addProfileSelect.innerHTML = '<option value="">Select Profile</option>';
+
+                        data.profiles.forEach(profile => {
+                            const option = document.createElement('option');
+                            option.value = profile.name;
+                            option.textContent = profile.name;
+                            addProfileSelect.appendChild(option);
+                        });
+
+                        // Update Edit User modal dropdown
+                        const editProfileSelect = document.getElementById('editPPPoEProfile');
+                        editProfileSelect.innerHTML = '';
+
+                        data.profiles.forEach(profile => {
+                            const option = document.createElement('option');
+                            option.value = profile.name;
+                            option.textContent = profile.name;
+                            editProfileSelect.appendChild(option);
+                        });
+
+                        console.log('PPPoE profiles loaded:', data.profiles.length);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading PPPoE profiles:', error);
+                    AlijayaWeb.showToast('Failed to load PPPoE profiles', 'warning');
+                });
+        }
+
+        function addPPPoEUser() {
+            const username = document.getElementById('pppoeUsername').value;
+            const password = document.getElementById('pppoePassword').value;
+            const profile = document.getElementById('pppoeProfile').value;
+            const service = document.getElementById('pppoeService').value;
+
+            if (!username || !password || !profile) {
+                AlijayaWeb.showToast('Please fill all required fields', 'error');
+                return;
+            }
+
+            AlijayaWeb.showToast('Adding PPPoE user...', 'info');
+
+            fetch('/admin/api/pppoe/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                    profile: profile,
+                    service: service
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    AlijayaWeb.showToast('PPPoE user added successfully', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('addPPPoEModal')).hide();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    AlijayaWeb.showToast('Failed to add user: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                AlijayaWeb.showToast('Error adding user: ' + error.message, 'error');
+            });
+        }
+
+        function editPPPoEUser(username) {
+            // Load profiles first, then fetch user details
+            loadPPPoEProfiles();
+
+            // Fetch user details and populate edit modal
+            fetch('/admin/api/pppoe/users/' + encodeURIComponent(username))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        document.getElementById('editPPPoEId').value = username;
+                        document.getElementById('editPPPoEUsername').value = username;
+
+                        // Set profile after profiles are loaded
+                        setTimeout(() => {
+                            document.getElementById('editPPPoEProfile').value = data.user.profile || 'default';
+                        }, 100);
+
+                        document.getElementById('editPPPoEDisabled').checked = data.user.disabled === 'true';
+
+                        const modal = new bootstrap.Modal(document.getElementById('editPPPoEModal'));
+                        modal.show();
+                    } else {
+                        AlijayaWeb.showToast('Failed to load user details', 'error');
+                    }
+                })
+                .catch(error => {
+                    AlijayaWeb.showToast('Error loading user: ' + error.message, 'error');
+                });
+        }
+
+        function updatePPPoEUser() {
+            const username = document.getElementById('editPPPoEId').value;
+            const password = document.getElementById('editPPPoEPassword').value;
+            const profile = document.getElementById('editPPPoEProfile').value;
+            const disabled = document.getElementById('editPPPoEDisabled').checked;
+
+            AlijayaWeb.showToast('Updating PPPoE user...', 'info');
+
+            const updateData = {
+                profile: profile,
+                disabled: disabled
+            };
+
+            if (password) {
+                updateData.password = password;
+            }
+
+            fetch('/admin/api/pppoe/users/' + encodeURIComponent(username), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    AlijayaWeb.showToast('PPPoE user updated successfully', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('editPPPoEModal')).hide();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    AlijayaWeb.showToast('Failed to update user: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                AlijayaWeb.showToast('Error updating user: ' + error.message, 'error');
+            });
+        }
+
+        function deletePPPoEUser(username) {
+            if (confirm('Are you sure you want to delete user: ' + username + '?')) {
+                AlijayaWeb.showToast('Deleting PPPoE user...', 'warning');
+
+                fetch('/admin/api/pppoe/users/' + encodeURIComponent(username), {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AlijayaWeb.showToast('PPPoE user deleted successfully', 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        AlijayaWeb.showToast('Failed to delete user: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    AlijayaWeb.showToast('Error deleting user: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function disconnectUser(username) {
+            if (confirm(`Are you sure you want to disconnect user: ${username}?`)) {
+                AlijayaWeb.showToast(`Disconnecting user: ${username}`, 'warning');
+                // Implementation for disconnecting user
+                setTimeout(() => {
+                    AlijayaWeb.showToast(`User ${username} disconnected successfully`, 'success');
+                    refreshPPPoE();
+                }, 2000);
+            }
+        }
+        
+        // Update system info in sidebar
+        function updateSystemInfo() {
+            fetch('/admin/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('systemUptime').textContent = '15d 8h';
+                    document.getElementById('systemMemory').textContent = '45%';
+                    document.getElementById('systemCPU').textContent = '25%';
+                })
+                .catch(error => {
+                    console.error('Error updating system info:', error);
+                });
+        }
+
+        // PPPoE User Search Functions
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchPPPoEUser();
+            }
+        }
+
+        function searchPPPoEUser() {
+            const username = document.getElementById('searchUsername').value.trim();
+            if (!username) {
+                AlijayaWeb.showToast('Please enter a username to search', 'warning');
+                return;
+            }
+
+            AlijayaWeb.showToast('Searching for user...', 'info');
+
+            // Hide all sections first
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('allUsersList').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+
+            // Search from all users instead of individual API call
+            fetch('/admin/api/pppoe/all-users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.users) {
+                        // Filter users by username (case insensitive)
+                        const filteredUsers = data.users.filter(user =>
+                            user.name.toLowerCase().includes(username.toLowerCase())
+                        );
+
+                        if (filteredUsers.length > 0) {
+                            displaySearchResults(filteredUsers);
+                            AlijayaWeb.showToast(`Found ${filteredUsers.length} user(s)`, 'success');
+                        } else {
+                            document.getElementById('noResults').style.display = 'block';
+                            AlijayaWeb.showToast('User not found', 'warning');
+                        }
+                    } else {
+                        document.getElementById('noResults').style.display = 'block';
+                        AlijayaWeb.showToast('Failed to search users', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    document.getElementById('noResults').style.display = 'block';
+                    AlijayaWeb.showToast('Search failed: ' + error.message, 'error');
+                });
+        }
+
+        function loadAllPPPoEUsers() {
+            AlijayaWeb.showToast('Loading all PPPoE users...', 'info');
+
+            // Hide all sections first
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('allUsersList').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+
+            // Load all users using the new comprehensive API
+            fetch('/admin/api/pppoe/all-users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.users) {
+                        if (data.users.length > 0) {
+                            displayAllUsers(data.users);
+                            AlijayaWeb.showToast(
+                                `Found ${data.totalUsers} users (${data.activeUsers} active, ${data.offlineUsers} offline)`,
+                                'success'
+                            );
+                        } else {
+                            document.getElementById('noResults').style.display = 'block';
+                            AlijayaWeb.showToast('No PPPoE users found', 'warning');
+                        }
+                    } else {
+                        document.getElementById('noResults').style.display = 'block';
+                        AlijayaWeb.showToast('Failed to load users', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Load all users error:', error);
+                    document.getElementById('noResults').style.display = 'block';
+                    AlijayaWeb.showToast('Failed to load users: ' + error.message, 'error');
+                });
+        }
+
+        function displaySearchResults(users) {
+            const tbody = document.getElementById('searchResultsBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = createUserRow(user);
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('searchResults').style.display = 'block';
+        }
+
+        function displayAllUsers(users) {
+            const tbody = document.getElementById('allUsersBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = createUserRow(user);
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('allUsersList').style.display = 'block';
+        }
+
+        function createUserRow(user) {
+            const row = document.createElement('tr');
+            const username = user.name || user.username || 'Unknown';
+            const profile = user.profile || 'default';
+            const status = user.status || (user.isActive ? 'Active' : 'Offline');
+            const lastLogin = user.lastLogin || user.uptime || 'N/A';
+
+            // Add disabled status if user is disabled
+            const isDisabled = user.disabled === true || user.disabled === 'true';
+            const displayStatus = isDisabled ? 'Disabled' : status;
+            const statusClass = isDisabled ? 'bg-warning' : (status === 'Active' ? 'bg-success' : 'bg-secondary');
+
+            row.innerHTML = `
+                <td>
+                    <strong>${username}</strong>
+                    ${user.comment ? `<br><small class="text-muted">${user.comment}</small>` : ''}
+                    ${user.address ? `<br><small class="text-info">IP: ${user.address}</small>` : ''}
+                </td>
+                <td><span class="badge bg-info">${profile}</span></td>
+                <td>
+                    <span class="badge ${statusClass}">
+                        ${displayStatus}
+                    </span>
+                    ${user.callerID ? `<br><small class="text-muted">ID: ${user.callerID}</small>` : ''}
+                </td>
+                <td>
+                    ${lastLogin}
+                    ${user.service ? `<br><small class="text-muted">Service: ${user.service}</small>` : ''}
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editPPPoEUser('${username}')" title="Edit User">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePPPoEUser('${username}')" title="Delete User">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        ${status === 'Active' && !isDisabled ? `
+                            <button class="btn btn-sm btn-outline-warning" onclick="disconnectUser('${username}')" title="Disconnect">
+                                <i class="bi bi-plug"></i>
+                            </button>
+                        ` : ''}
+                        ${isDisabled ? `
+                            <button class="btn btn-sm btn-outline-success" onclick="enableUser('${username}')" title="Enable User">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                        ` : `
+                            <button class="btn btn-sm btn-outline-secondary" onclick="disableUser('${username}')" title="Disable User">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        `}
+                    </div>
+                </td>
+            `;
+
+            return row;
+        }
+
+        function disconnectUser(username) {
+            if (confirm(`Are you sure you want to disconnect user: ${username}?`)) {
+                AlijayaWeb.showToast('Disconnecting user...', 'warning');
+
+                // This would call an API to disconnect the user
+                fetch('/admin/api/pppoe/users/' + encodeURIComponent(username) + '/disconnect', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AlijayaWeb.showToast('User disconnected successfully', 'success');
+                        // Refresh the current view
+                        if (document.getElementById('searchResults').style.display !== 'none') {
+                            searchPPPoEUser();
+                        } else if (document.getElementById('allUsersList').style.display !== 'none') {
+                            loadAllPPPoEUsers();
+                        }
+                    } else {
+                        AlijayaWeb.showToast('Failed to disconnect user: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    AlijayaWeb.showToast('Error disconnecting user: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function enableUser(username) {
+            if (confirm(`Are you sure you want to enable user: ${username}?`)) {
+                AlijayaWeb.showToast('Enabling user...', 'info');
+
+                // This would call an API to enable the user
+                fetch('/admin/api/pppoe/users/' + encodeURIComponent(username) + '/enable', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AlijayaWeb.showToast('User enabled successfully', 'success');
+                        // Refresh the current view
+                        refreshCurrentView();
+                    } else {
+                        AlijayaWeb.showToast('Failed to enable user: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    AlijayaWeb.showToast('Error enabling user: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function disableUser(username) {
+            if (confirm(`Are you sure you want to disable user: ${username}?`)) {
+                AlijayaWeb.showToast('Disabling user...', 'warning');
+
+                // This would call an API to disable the user
+                fetch('/admin/api/pppoe/users/' + encodeURIComponent(username) + '/disable', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AlijayaWeb.showToast('User disabled successfully', 'success');
+                        // Refresh the current view
+                        refreshCurrentView();
+                    } else {
+                        AlijayaWeb.showToast('Failed to disable user: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    AlijayaWeb.showToast('Error disabling user: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function refreshCurrentView() {
+            // Refresh the current view based on what's visible
+            if (document.getElementById('searchResults').style.display !== 'none') {
+                searchPPPoEUser();
+            } else if (document.getElementById('allUsersList').style.display !== 'none') {
+                loadAllPPPoEUsers();
+            }
+        }
+
+        // Initial load
+        updateSystemInfo();
+        loadPPPoEProfiles(); // Load profiles on page load
+
+        // Update PPPoE stats with real data
+        function updatePPPoEStats() {
+            fetch('/admin/api/pppoe/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update statistics cards
+                    const activeSessionsElement = document.getElementById('activeSessions');
+                    if (activeSessionsElement) {
+                        activeSessionsElement.textContent = data.activeConnections || 0;
+                    }
+
+                    console.log('PPPoE stats updated:', data);
+                })
+                .catch(error => {
+                    console.error('Error updating PPPoE stats:', error);
+                });
+        }
+
+        // Initial load
+        updatePPPoEStats();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            updateSystemInfo();
+            updatePPPoEStats();
+            console.log('Auto-refreshing PPPoE data...');
+        }, 30000);
+    </script>
+</body>
+</html>

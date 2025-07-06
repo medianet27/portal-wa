@@ -1,0 +1,509 @@
+<%- include('../layouts/main', { 
+    title: title,
+    content: `
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2"><i class="bi bi-speedometer2"></i> Speed Test</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <a href="/customer/dashboard" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Speedtest Container -->
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-speedometer2"></i> Test Kecepatan Internet
+                        </h5>
+                        <small class="text-muted d-none d-md-block">Ukur kecepatan download dan upload koneksi internet Anda</small>
+                    </div>
+                    <div class="card-body p-2 p-md-4">
+                        <!-- Speedometer Gauge -->
+                        <div class="text-center mb-3 mb-md-4">
+                            <div id="speedometer" class="speedometer-container">
+                                <canvas id="speedCanvas"></canvas>
+                                <div id="speedValue" class="speed-value">0</div>
+                                <div id="speedUnit" class="speed-unit">Mbps</div>
+                            </div>
+                        </div>
+
+                        <!-- Test Controls -->
+                        <div class="text-center mb-3 mb-md-4">
+                            <button id="startTestBtn" class="btn btn-primary btn-lg px-4 px-md-5" onclick="startSpeedTest()">
+                                <i class="bi bi-play-circle"></i> <span class="d-none d-sm-inline">Mulai </span>Test
+                            </button>
+                            <button id="stopTestBtn" class="btn btn-danger btn-lg px-4 px-md-5" onclick="stopSpeedTest()" style="display: none;">
+                                <i class="bi bi-stop-circle"></i> <span class="d-none d-sm-inline">Hentikan </span>Test
+                            </button>
+                        </div>
+
+                        <!-- Test Status -->
+                        <div id="testStatus" class="text-center mb-3 mb-md-4" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 mb-0 small" id="statusText">Mempersiapkan test...</p>
+                        </div>
+
+                        <!-- Results -->
+                        <div id="testResults" style="display: none;">
+                            <div class="row text-center g-2 g-md-3">
+                                <div class="col-4">
+                                    <div class="card bg-primary text-white h-100">
+                                        <div class="card-body p-2 p-md-3">
+                                            <i class="bi bi-download fs-3 fs-md-2"></i>
+                                            <h6 class="card-title mt-1 mt-md-2 mb-1 small">Download</h6>
+                                            <h5 class="h6 h-md-3 mb-0" id="downloadSpeed">0 Mbps</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="card bg-success text-white h-100">
+                                        <div class="card-body p-2 p-md-3">
+                                            <i class="bi bi-upload fs-3 fs-md-2"></i>
+                                            <h6 class="card-title mt-1 mt-md-2 mb-1 small">Upload</h6>
+                                            <h5 class="h6 h-md-3 mb-0" id="uploadSpeed">0 Mbps</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="card bg-warning text-white h-100">
+                                        <div class="card-body p-2 p-md-3">
+                                            <i class="bi bi-clock fs-3 fs-md-2"></i>
+                                            <h6 class="card-title mt-1 mt-md-2 mb-1 small">Ping</h6>
+                                            <h5 class="h6 h-md-3 mb-0" id="pingTime">0 ms</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Test History -->
+                        <div class="mt-3 mt-md-4">
+                            <h6 class="small"><i class="bi bi-clock-history"></i> Riwayat Test Terakhir</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm small">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-nowrap">Waktu</th>
+                                            <th class="text-nowrap">Download</th>
+                                            <th class="text-nowrap">Upload</th>
+                                            <th class="text-nowrap">Ping</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="testHistory">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">Belum ada riwayat test</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="row justify-content-center mt-3 mt-md-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0 small">
+                            <i class="bi bi-lightbulb"></i> Tips untuk Test yang Akurat
+                        </h6>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <ul class="list-unstyled small mb-2 mb-md-0">
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i> Tutup aplikasi yang menggunakan internet</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i> Gunakan koneksi WiFi atau kabel langsung</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i> Pastikan tidak ada download/upload besar</li>
+                                </ul>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <ul class="list-unstyled small mb-0">
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i> Test di waktu yang berbeda untuk hasil rata-rata</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i> Restart router jika hasil tidak konsisten</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i> Hubungi support jika kecepatan jauh di bawah paket</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .speedometer-container {
+                position: relative;
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+                aspect-ratio: 4/3;
+            }
+
+            #speedCanvas {
+                width: 100%;
+                height: auto;
+                max-width: 400px;
+                max-height: 300px;
+            }
+
+            .speed-value {
+                position: absolute;
+                bottom: 25%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: clamp(1.5rem, 4vw, 2.5rem);
+                font-weight: bold;
+                color: #2563eb;
+                line-height: 1;
+            }
+
+            .speed-unit {
+                position: absolute;
+                bottom: 15%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: clamp(0.8rem, 2vw, 1rem);
+                color: #6b7280;
+                line-height: 1;
+            }
+
+            @media (max-width: 576px) {
+                .speedometer-container {
+                    max-width: 300px;
+                }
+
+                .speed-value {
+                    bottom: 22%;
+                    font-size: 1.8rem;
+                }
+
+                .speed-unit {
+                    bottom: 12%;
+                    font-size: 0.9rem;
+                }
+            }
+        </style>
+
+        <script>
+            let testRunning = false;
+            let testInterval;
+            let currentSpeed = 0;
+            let maxSpeed = 100; // Maximum speed for gauge
+            let canvasSize = { width: 400, height: 300 };
+
+            // Initialize speedometer with responsive sizing
+            function initSpeedometer() {
+                const canvas = document.getElementById('speedCanvas');
+                const container = document.getElementById('speedometer');
+
+                // Set responsive canvas size
+                const containerWidth = container.offsetWidth;
+                const isMobile = window.innerWidth < 576;
+
+                if (isMobile) {
+                    canvasSize.width = Math.min(300, containerWidth);
+                    canvasSize.height = Math.round(canvasSize.width * 0.75);
+                } else {
+                    canvasSize.width = Math.min(400, containerWidth);
+                    canvasSize.height = Math.round(canvasSize.width * 0.75);
+                }
+
+                canvas.width = canvasSize.width;
+                canvas.height = canvasSize.height;
+
+                const ctx = canvas.getContext('2d');
+                drawSpeedometer(ctx, 0);
+            }
+
+            // Handle window resize
+            function handleResize() {
+                initSpeedometer();
+                updateSpeed(currentSpeed);
+            }
+
+            window.addEventListener('resize', handleResize);
+            
+            // Draw speedometer gauge with responsive sizing
+            function drawSpeedometer(ctx, speed) {
+                const centerX = canvasSize.width / 2;
+                const centerY = canvasSize.height * 0.67; // Position gauge higher
+                const radius = Math.min(canvasSize.width, canvasSize.height) * 0.3;
+                const lineWidth = Math.max(8, radius * 0.15);
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
+
+                // Draw outer circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI, true);
+                ctx.strokeStyle = '#e5e7eb';
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+
+                // Draw speed arc
+                const speedAngle = (speed / maxSpeed) * Math.PI;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + speedAngle, false);
+
+                // Color based on speed
+                if (speed < 10) {
+                    ctx.strokeStyle = '#ef4444'; // Red
+                } else if (speed < 50) {
+                    ctx.strokeStyle = '#f59e0b'; // Yellow
+                } else {
+                    ctx.strokeStyle = '#10b981'; // Green
+                }
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+
+                // Draw speed markers
+                const markerLength = radius * 0.15;
+                const labelDistance = radius * 0.25;
+                const fontSize = Math.max(10, radius * 0.08);
+
+                for (let i = 0; i <= 10; i++) {
+                    const angle = Math.PI + (i / 10) * Math.PI;
+                    const x1 = centerX + (radius - markerLength) * Math.cos(angle);
+                    const y1 = centerY + (radius - markerLength) * Math.sin(angle);
+                    const x2 = centerX + (radius - 5) * Math.cos(angle);
+                    const y2 = centerY + (radius - 5) * Math.sin(angle);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.strokeStyle = '#6b7280';
+                    ctx.lineWidth = Math.max(1, radius * 0.015);
+                    ctx.stroke();
+
+                    // Draw speed labels (every other marker)
+                    if (i % 2 === 0) {
+                        const labelX = centerX + (radius - labelDistance) * Math.cos(angle);
+                        const labelY = centerY + (radius - labelDistance) * Math.sin(angle);
+                        ctx.fillStyle = '#6b7280';
+                        ctx.font = \`\${fontSize}px Arial\`;
+                        ctx.textAlign = 'center';
+                        ctx.fillText((i * 10).toString(), labelX, labelY + fontSize/3);
+                    }
+                }
+
+                // Draw needle
+                const needleAngle = Math.PI + (speed / maxSpeed) * Math.PI;
+                const needleLength = radius * 0.7;
+                const needleX = centerX + needleLength * Math.cos(needleAngle);
+                const needleY = centerY + needleLength * Math.sin(needleAngle);
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(needleX, needleY);
+                ctx.strokeStyle = '#1f2937';
+                ctx.lineWidth = Math.max(2, radius * 0.02);
+                ctx.stroke();
+
+                // Draw center circle
+                const centerRadius = Math.max(4, radius * 0.05);
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, centerRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#1f2937';
+                ctx.fill();
+            }
+            
+            // Update speed display
+            function updateSpeed(speed) {
+                currentSpeed = speed;
+                document.getElementById('speedValue').textContent = speed.toFixed(1);
+                
+                const canvas = document.getElementById('speedCanvas');
+                const ctx = canvas.getContext('2d');
+                drawSpeedometer(ctx, speed);
+            }
+            
+            // Start speed test
+            function startSpeedTest() {
+                if (testRunning) return;
+                
+                testRunning = true;
+                document.getElementById('startTestBtn').style.display = 'none';
+                document.getElementById('stopTestBtn').style.display = 'inline-block';
+                document.getElementById('testStatus').style.display = 'block';
+                document.getElementById('testResults').style.display = 'none';
+                
+                // Simulate speed test phases
+                simulateSpeedTest();
+            }
+            
+            // Stop speed test
+            function stopSpeedTest() {
+                testRunning = false;
+                clearInterval(testInterval);
+                
+                document.getElementById('startTestBtn').style.display = 'inline-block';
+                document.getElementById('stopTestBtn').style.display = 'none';
+                document.getElementById('testStatus').style.display = 'none';
+                
+                updateSpeed(0);
+            }
+            
+            // Real speed test implementation using API
+            async function simulateSpeedTest() {
+                let phase = 'ping';
+                let progress = 0;
+                let downloadSpeed = 0;
+                let uploadSpeed = 0;
+                let pingTime = 0;
+
+                try {
+                    // Phase 1: Ping Test
+                    document.getElementById('statusText').textContent = 'Mengukur ping...';
+                    updateSpeed(0);
+
+                    const pingResponse = await fetch('/customer/api/speedtest/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ testType: 'ping' })
+                    });
+                    const pingData = await pingResponse.json();
+
+                    if (pingData.error) {
+                        throw new Error(pingData.error);
+                    }
+
+                    pingTime = pingData.value;
+
+                    // Simulate ping progress
+                    for (let i = 0; i <= 30 && testRunning; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        if (!testRunning) return;
+                    }
+
+                    // Phase 2: Download Test
+                    if (!testRunning) return;
+                    document.getElementById('statusText').textContent = 'Mengukur kecepatan download...';
+
+                    const downloadResponse = await fetch('/customer/api/speedtest/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ testType: 'download' })
+                    });
+                    const downloadData = await downloadResponse.json();
+
+                    if (downloadData.error) {
+                        throw new Error(downloadData.error);
+                    }
+
+                    downloadSpeed = downloadData.value;
+
+                    // Simulate download progress with realistic speed buildup
+                    for (let i = 0; i <= 60 && testRunning; i++) {
+                        const currentSpeed = (downloadSpeed * i) / 60;
+                        updateSpeed(currentSpeed);
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        if (!testRunning) return;
+                    }
+
+                    // Phase 3: Upload Test
+                    if (!testRunning) return;
+                    document.getElementById('statusText').textContent = 'Mengukur kecepatan upload...';
+
+                    const uploadResponse = await fetch('/customer/api/speedtest/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ testType: 'upload' })
+                    });
+                    const uploadData = await uploadResponse.json();
+
+                    if (uploadData.error) {
+                        throw new Error(uploadData.error);
+                    }
+
+                    uploadSpeed = uploadData.value;
+
+                    // Simulate upload progress
+                    for (let i = 0; i <= 60 && testRunning; i++) {
+                        const currentSpeed = (uploadSpeed * i) / 60;
+                        updateSpeed(currentSpeed);
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        if (!testRunning) return;
+                    }
+
+                    // Test completed
+                    if (testRunning) {
+                        finishSpeedTest(downloadSpeed, uploadSpeed, pingTime);
+                    }
+
+                } catch (error) {
+                    console.error('Speed test error:', error);
+                    testRunning = false;
+                    document.getElementById('startTestBtn').style.display = 'inline-block';
+                    document.getElementById('stopTestBtn').style.display = 'none';
+                    document.getElementById('testStatus').style.display = 'none';
+                    alert('Error running speed test: ' + error.message);
+                    updateSpeed(0);
+                }
+            }
+            
+            // Finish speed test and show results
+            function finishSpeedTest(download, upload, ping) {
+                testRunning = false;
+                clearInterval(testInterval);
+                
+                document.getElementById('startTestBtn').style.display = 'inline-block';
+                document.getElementById('stopTestBtn').style.display = 'none';
+                document.getElementById('testStatus').style.display = 'none';
+                document.getElementById('testResults').style.display = 'block';
+                
+                // Update result displays
+                document.getElementById('downloadSpeed').textContent = download.toFixed(1) + ' Mbps';
+                document.getElementById('uploadSpeed').textContent = upload.toFixed(1) + ' Mbps';
+                document.getElementById('pingTime').textContent = ping.toFixed(0) + ' ms';
+                
+                // Add to history
+                addToHistory(download, upload, ping);
+                
+                // Keep showing download speed on gauge
+                updateSpeed(download);
+            }
+            
+            // Add test result to history
+            function addToHistory(download, upload, ping) {
+                const historyBody = document.getElementById('testHistory');
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('id-ID');
+                
+                // Remove "no history" message if it exists
+                if (historyBody.children.length === 1 && historyBody.children[0].children.length === 1) {
+                    historyBody.innerHTML = '';
+                }
+                
+                // Add new row at the top
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = \`
+                    <td>\${timeString}</td>
+                    <td>\${download.toFixed(1)} Mbps</td>
+                    <td>\${upload.toFixed(1)} Mbps</td>
+                    <td>\${ping.toFixed(0)} ms</td>
+                \`;
+                historyBody.insertBefore(newRow, historyBody.firstChild);
+                
+                // Keep only last 5 results
+                while (historyBody.children.length > 5) {
+                    historyBody.removeChild(historyBody.lastChild);
+                }
+            }
+            
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                initSpeedometer();
+            });
+        </script>
+    `
+}) %>

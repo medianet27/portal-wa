@@ -233,8 +233,10 @@ const genieacsApi = {
                 
                 // Active Devices
                 'InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries',
+                'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.TotalAssociations',
                 'Device.Hosts.HostNumberOfEntries',
                 'VirtualParameters.activedevices',
+                'VirtualParameters.getactivedevices',
                 
                 // RX Power
                 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.XPON.RxPower',

@@ -23,6 +23,45 @@ function formatPhoneNumber(number) {
     return cleaned;
 }
 
+// Helper function untuk mendapatkan header dan footer dari settings
+function getHeaderFooter() {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const settingsPath = path.join(__dirname, '../settings.json');
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+        
+        return {
+            header: settings.company_header || 'ALIJAYA BOT MANAGEMENT ISP',
+            footer: settings.footer_info || 'Internet Tanpa Batas'
+        };
+    } catch (error) {
+        return {
+            header: 'ALIJAYA BOT MANAGEMENT ISP',
+            footer: 'Internet Tanpa Batas'
+        };
+    }
+}
+
+// Helper function untuk memformat pesan dengan header dan footer
+function formatMessageWithHeaderFooter(message, includeHeader = true, includeFooter = true) {
+    const { header, footer } = getHeaderFooter();
+    
+    let formattedMessage = '';
+    
+    if (includeHeader) {
+        formattedMessage += `🏢 *${header}*\n\n`;
+    }
+    
+    formattedMessage += message;
+    
+    if (includeFooter) {
+        formattedMessage += `\n\n${footer}`;
+    }
+    
+    return formattedMessage;
+}
+
 // Fungsi untuk mengirim pesan
 async function sendMessage(number, message) {
     if (!sock) {
@@ -38,7 +77,18 @@ async function sendMessage(number, message) {
             const formattedNumber = formatPhoneNumber(number);
             jid = `${formattedNumber}@s.whatsapp.net`;
         }
-        await sock.sendMessage(jid, { text: message });
+        
+        // Format pesan dengan header dan footer
+        let formattedMessage;
+        if (typeof message === 'string') {
+            formattedMessage = { text: formatMessageWithHeaderFooter(message) };
+        } else if (message.text) {
+            formattedMessage = { text: formatMessageWithHeaderFooter(message.text) };
+        } else {
+            formattedMessage = message;
+        }
+        
+        await sock.sendMessage(jid, formattedMessage);
         return true;
     } catch (error) {
         console.error('Error sending message:', error);
@@ -69,7 +119,8 @@ async function sendGroupMessage(numbers, message) {
             if (!number || number.trim() === '') continue;
             
             const formattedNumber = formatPhoneNumber(number);
-            await sock.sendMessage(`${formattedNumber}@s.whatsapp.net`, { text: message });
+            const formattedMessage = { text: formatMessageWithHeaderFooter(message) };
+            await sock.sendMessage(`${formattedNumber}@s.whatsapp.net`, formattedMessage);
             sent++;
             results.push({ number: formattedNumber, success: true });
             
@@ -108,10 +159,13 @@ async function sendTechnicianMessage(message, priority = 'normal') {
         }
         const priorityMessage = priorityIcon + message;
 
+        // Format pesan dengan header dan footer
+        const formattedMessage = formatMessageWithHeaderFooter(priorityMessage);
+
         // Kirim ke grup jika ada
         if (technicianGroupId) {
             try {
-                await sendMessage(technicianGroupId, priorityMessage);
+                await sendMessage(technicianGroupId, formattedMessage);
                 sentToGroup = true;
                 console.log(`Pesan dikirim ke grup teknisi: ${technicianGroupId}`);
             } catch (e) {
@@ -120,14 +174,14 @@ async function sendTechnicianMessage(message, priority = 'normal') {
         }
         // Kirim ke nomor teknisi jika ada
         if (technicianNumbers) {
-            const result = await sendGroupMessage(technicianNumbers, priorityMessage);
+            const result = await sendGroupMessage(technicianNumbers, formattedMessage);
             sentToNumbers = result.success;
             console.log(`Pesan dikirim ke nomor teknisi: ${result.sent} berhasil, ${result.failed} gagal`);
         } else {
             // Jika tidak ada nomor teknisi, fallback ke admin
             const adminNumber = process.env.ADMIN_NUMBER;
             if (adminNumber) {
-                await sendMessage(adminNumber, priorityMessage);
+                await sendMessage(adminNumber, formattedMessage);
                 sentToNumbers = true;
             }
         }
@@ -142,5 +196,7 @@ module.exports = {
     setSock,
     sendMessage,
     sendGroupMessage,
-    sendTechnicianMessage
+    sendTechnicianMessage,
+    formatMessageWithHeaderFooter,
+    getHeaderFooter
 };

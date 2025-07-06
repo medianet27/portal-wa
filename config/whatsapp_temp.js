@@ -772,16 +772,11 @@ async function handleHelpCommand(remoteJid, isAdmin = false) {
    Contoh: setgenieacs http://192.168.8.89:7557 admin admin
 ▸ *setmikrotik [host] [port] [user] [password]* — Ganti konfigurasi Mikrotik
    Contoh: setmikrotik 192.168.8.1 8728 admin admin
-
-🔐 *Manajemen OTP Portal:*
-▸ *otp on* — Aktifkan sistem OTP untuk portal pelanggan
-▸ *otp off* — Nonaktifkan sistem OTP untuk portal pelanggan
-▸ *otp status* — Lihat status sistem OTP
 `;
         }
 
         helpMessage += `
-�� *Versi Bot:* v1.0.0
+📱 *Versi Bot:* v1.0.0
 🏢 *ALIJAYA HOTSPOT*`;
 
         await sendFormattedMessage(remoteJid, helpMessage);
@@ -892,11 +887,6 @@ async function sendAdminMenuList(remoteJid) {
    Contoh: setgenieacs http://192.168.8.89:7557 admin admin
 ▸ *setmikrotik [host] [port] [user] [password]* — Ganti konfigurasi Mikrotik
    Contoh: setmikrotik 192.168.8.1 8728 admin admin
-
-🔐 *Manajemen OTP Portal:*
-▸ *otp on* — Aktifkan sistem OTP untuk portal pelanggan
-▸ *otp off* — Nonaktifkan sistem OTP untuk portal pelanggan
-▸ *otp status* — Lihat status sistem OTP
 
 📱 *Versi Bot:* v1.0.0
 `;
@@ -2462,7 +2452,9 @@ async function handleAdminEditPassword(remoteJid, customerNumber, newPassword) {
                 const formattedNumber = formatPhoneNumber(customerNumber);
                 
                 // Buat pesan notifikasi untuk pelanggan
-                const notificationMessage = formatWithHeaderFooter(`📢 *INFORMASI PERUBAHAN PASSWORD WIFI*
+                const notificationMessage = `🏢 *${COMPANY_HEADER || ''}*
+                
+📢 *INFORMASI PERUBAHAN PASSWORD WIFI*
 
 Halo Pelanggan yang terhormat,
 
@@ -2472,7 +2464,7 @@ Password WiFi Anda telah diubah oleh administrator sistem. Berikut detail peruba
 🔐 *Password Baru:* ${newPassword}
 
 Silakan gunakan password baru ini untuk terhubung ke jaringan WiFi Anda.
-Perubahan akan diterapkan dalam beberapa menit.`);
+Perubahan akan diterapkan dalam beberapa menit.${FOOTER_INFO || ''}`;
 
                 // Kirim pesan menggunakan sock
                 await sock.sendMessage(`${formattedNumber}@s.whatsapp.net`, { 
@@ -3746,7 +3738,8 @@ module.exports = {
     getWhatsAppStatus,
     deleteWhatsAppSession,
     getSock,
-    handleOfflineUsers
+    handleOfflineUsers,
+    updateConfig
 };
 
 // Fungsi untuk mengecek apakah perintah terkait dengan WiFi/SSID
@@ -4113,65 +4106,6 @@ return;
             await sendFormattedMessage(remoteJid, `✅ *Konfigurasi Mikrotik berhasil diubah!*`);
             return;
 }
-        
-        // Handler OTP management
-        if (command.startsWith('otp ')) {
-            if (!isAdmin) {
-                await sendFormattedMessage(remoteJid, '❌ *Hanya admin yang dapat mengatur OTP!*');
-                return;
-            }
-            const subCommand = messageText.split(' ').slice(1)[0]?.toLowerCase();
-            
-            switch (subCommand) {
-                case 'on':
-                case 'enable':
-                    console.log(`Admin ${senderNumber} mengaktifkan OTP`);
-                    let settingsOn = getAppSettings();
-                    settingsOn.customerPortalOtp = true;
-                    settingsOn.customer_otp_enabled = true;
-                    fs.writeFileSync(settingsPath, JSON.stringify(settingsOn, null, 2));
-                    await sendFormattedMessage(remoteJid, `✅ *OTP DIAKTIFKAN*\n\nSistem OTP untuk portal pelanggan telah diaktifkan.\nPelanggan akan diminta memasukkan kode OTP saat login.`);
-                    return;
-
-                case 'off':
-                case 'disable':
-                    console.log(`Admin ${senderNumber} menonaktifkan OTP`);
-                    let settingsOff = getAppSettings();
-                    settingsOff.customerPortalOtp = false;
-                    settingsOff.customer_otp_enabled = false;
-                    fs.writeFileSync(settingsPath, JSON.stringify(settingsOff, null, 2));
-                    await sendFormattedMessage(remoteJid, `✅ *OTP DINONAKTIFKAN*\n\nSistem OTP untuk portal pelanggan telah dinonaktifkan.\nPelanggan dapat login langsung tanpa OTP.`);
-                    return;
-
-                case 'status':
-                    console.log(`Admin ${senderNumber} melihat status OTP`);
-                    let settingsStatus = getAppSettings();
-                    // Cek kedua pengaturan untuk kompatibilitas
-                    const otpStatus = settingsStatus.customerPortalOtp || settingsStatus.customer_otp_enabled;
-                    const otpLength = settingsStatus.otp_length || 4;
-                    const otpExpiry = settingsStatus.otp_expiry_minutes || 5;
-                    
-                    await sendFormattedMessage(remoteJid, `📊 *STATUS OTP*\n\n` +
-                        `🔐 Status: ${otpStatus ? '🟢 AKTIF' : '🔴 NONAKTIF'}\n` +
-                        `📏 Panjang Kode: ${otpLength} digit\n` +
-                        `⏰ Masa Berlaku: ${otpExpiry} menit\n\n` +
-                        `*Perintah yang tersedia:*\n` +
-                        `• otp on - Aktifkan OTP\n` +
-                        `• otp off - Nonaktifkan OTP\n` +
-                        `• otp status - Lihat status OTP`);
-                    return;
-
-                default:
-                    await sendFormattedMessage(remoteJid, `❌ *Format salah!*\n\n` +
-                        `*Perintah OTP yang tersedia:*\n` +
-                        `• otp on - Aktifkan OTP\n` +
-                        `• otp off - Nonaktifkan OTP\n` +
-                        `• otp status - Lihat status OTP\n\n` +
-                        `*Contoh:*\n` +
-                        `otp on`);
-                    return;
-            }
-        }
         
 // Perintah untuk mengaktifkan/menonaktifkan GenieACS (hanya untuk admin)
 // Perintah ini selalu diproses terlepas dari status genieacsCommandsEnabled
@@ -5032,17 +4966,11 @@ async function handleAdminMenu(remoteJid) {
         adminMessage += `• 🔍 *cekall* — Cek status semua ONU\n`;
         adminMessage += `• 🔍 *cek [nomor]* — Cek status ONU pelanggan\n`;
         adminMessage += `• 📶 *editssid [nomor] [ssid]* — Edit SSID pelanggan\n`;
-        adminMessage += `• 🔒 *editpass [nomor] [password]* — Edit password WiFi pelanggan\n`;
-        adminMessage += `• 🔐 *otp [on/off/status]* — Kelola sistem OTP\n\n`;
+        adminMessage += `• 🔒 *editpass [nomor] [password]* — Edit password WiFi pelanggan\n\n`;
         
         // Status GenieACS (tanpa menampilkan perintah)
         adminMessage += `*Status Sistem:*\n`;
-        adminMessage += `• ${genieacsCommandsEnabled ? '✅' : '❌'} *GenieACS:* ${genieacsCommandsEnabled ? 'Aktif' : 'Nonaktif'}\n`;
-        
-        // Tambahkan status OTP
-        const settings = getAppSettings();
-        const otpStatus = settings.customerPortalOtp || settings.customer_otp_enabled;
-        adminMessage += `• ${otpStatus ? '✅' : '❌'} *OTP Portal:* ${otpStatus ? 'Aktif' : 'Nonaktif'}\n\n`;
+        adminMessage += `• ${genieacsCommandsEnabled ? '✅' : '❌'} *GenieACS:* ${genieacsCommandsEnabled ? 'Aktif' : 'Nonaktif'}\n\n`;
         
         // Tambahkan footer
         adminMessage += `🏢 *${process.env.COMPANY_HEADER || 'ISP Monitor'}*\n`;
@@ -5111,16 +5039,10 @@ const settingsPath = path.join(__dirname, '../settings.json');
 function getAppSettings() {
     try {
         // Gunakan settingsManager yang sudah ada
-        const { getSettingsWithCache } = require('./settingsManager');
-        return getSettingsWithCache();
+        const { getAllSettings } = require('./settingsManager');
+        return getAllSettings();
     } catch (e) {
         console.error('Error getting app settings:', e);
-        // Fallback ke pembacaan langsung file
-        try {
-            return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-        } catch (fallbackError) {
-            console.error('Error reading settings file directly:', fallbackError);
-            return {};
-        }
+        return {};
     }
 }

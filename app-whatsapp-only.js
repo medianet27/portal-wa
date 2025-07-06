@@ -7,6 +7,7 @@ const whatsapp = require('./config/whatsapp');
 const { monitorPPPoEConnections } = require('./config/mikrotik');
 const fs = require('fs');
 const session = require('express-session');
+const { getSetting } = require('./config/settingsManager');
 
 // Inisialisasi aplikasi Express minimal (hanya untuk health check)
 const app = express();
@@ -33,49 +34,50 @@ global.whatsappStatus = {
     status: 'disconnected'
 };
 
-// Variabel global untuk menyimpan semua pengaturan dari .env
+// Variabel global untuk menyimpan semua pengaturan dari settings.json
 global.appSettings = {
   // Server
-  port: process.env.PORT || '3501',
-  host: process.env.HOST || 'localhost',
+  port: getSetting('server_port', 4555),
+  host: getSetting('server_host', 'localhost'),
   
   // Admin
-  adminUsername: process.env.ADMIN_USERNAME || 'admin',
-  adminPassword: process.env.ADMIN_PASSWORD || 'admin',
+  adminUsername: getSetting('admin_username', 'admin'),
+  adminPassword: getSetting('admin_password', 'admin'),
   
   // GenieACS
-  genieacsUrl: process.env.GENIEACS_URL || 'http://localhost:7557',
-  genieacsUsername: process.env.GENIEACS_USERNAME || '',
-  genieacsPassword: process.env.GENIEACS_PASSWORD || '',
-  genieApiUrl: process.env.GENIE_API_URL || '',
+  genieacsUrl: getSetting('genieacs_url', 'http://localhost:7557'),
+  genieacsUsername: getSetting('genieacs_username', ''),
+  genieacsPassword: getSetting('genieacs_password', ''),
   
   // Mikrotik
-  mikrotikHost: process.env.MIKROTIK_HOST || '',
-  mikrotikPort: process.env.MIKROTIK_PORT || '8728',
-  mikrotikUser: process.env.MIKROTIK_USER || '',
-  mikrotikPassword: process.env.MIKROTIK_PASSWORD || '',
+  mikrotikHost: getSetting('mikrotik_host', ''),
+  mikrotikPort: getSetting('mikrotik_port', '8728'),
+  mikrotikUser: getSetting('mikrotik_user', ''),
+  mikrotikPassword: getSetting('mikrotik_password', ''),
   
   // WhatsApp
-  adminNumber: process.env.ADMIN_NUMBER || '',
-  technicianNumbers: process.env.TECHNICIAN_NUMBERS || '',
-  reconnectInterval: process.env.RECONNECT_INTERVAL || '5000',
-  maxReconnectRetries: process.env.MAX_RECONNECT_RETRIES || '5',
-  whatsappSessionPath: process.env.WHATSAPP_SESSION_PATH || './whatsapp-session',
-  whatsappKeepAlive: process.env.WHATSAPP_KEEP_ALIVE === 'true',
-  whatsappRestartOnError: process.env.WHATSAPP_RESTART_ON_ERROR === 'true',
+  adminNumber: getSetting('admins', [''])[0] || '',
+  technicianNumbers: getSetting('technician_numbers', []).join(','),
+  reconnectInterval: 5000,
+  maxReconnectRetries: 5,
+  whatsappSessionPath: getSetting('whatsapp_session_path', './whatsapp-session'),
+  whatsappKeepAlive: getSetting('whatsapp_keep_alive', true),
+  whatsappRestartOnError: getSetting('whatsapp_restart_on_error', true),
   
   // Monitoring
-  pppoeMonitorInterval: process.env.PPPOE_MONITOR_INTERVAL || '60000',
-  rxPowerWarning: process.env.RX_POWER_WARNING || '-25',
-  rxPowerCritical: process.env.RX_POWER_CRITICAL || '-27',
+  pppoeMonitorInterval: getSetting('pppoe_monitor_interval', 60000),
+  rxPowerWarning: getSetting('rx_power_warning', -25),
+  rxPowerCritical: getSetting('rx_power_critical', -27),
+  rxPowerNotificationEnable: getSetting('rx_power_notification_enable', true),
+  rxPowerNotificationInterval: getSetting('rx_power_notification_interval', 300000),
   
   // Company Info
-  companyHeader: process.env.COMPANY_HEADER || 'ISP Monitor',
-  footerInfo: process.env.FOOTER_INFO || '',
+  companyHeader: getSetting('company_header', 'ISP Monitor'),
+  footerInfo: getSetting('footer_info', ''),
 };
 
 // Pastikan direktori sesi WhatsApp ada
-const sessionDir = process.env.WHATSAPP_SESSION_PATH || './whatsapp-session';
+const sessionDir = global.appSettings.whatsappSessionPath || './whatsapp-session';
 if (!fs.existsSync(sessionDir)) {
     fs.mkdirSync(sessionDir, { recursive: true });
     logger.info(`Direktori sesi WhatsApp dibuat: ${sessionDir}`);
@@ -115,6 +117,9 @@ const genieacsCommands = require('./config/genieacs-commands');
 // Import MikroTik commands module
 const mikrotikCommands = require('./config/mikrotik-commands');
 
+// Import RX Power Monitor module
+const rxPowerMonitor = require('./config/rxPowerMonitor');
+
 // Tambahkan view engine dan static
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -143,12 +148,20 @@ try {
             logger.info('WhatsApp connected successfully');
 
             // Initialize PPPoE monitoring jika MikroTik dikonfigurasi
-            if (process.env.MIKROTIK_HOST && process.env.MIKROTIK_USER && process.env.MIKROTIK_PASSWORD) {
+            if (global.appSettings.mikrotikHost && global.appSettings.mikrotikUser && global.appSettings.mikrotikPassword) {
                 pppoeMonitor.initializePPPoEMonitoring().then(() => {
                     logger.info('PPPoE monitoring initialized');
                 }).catch(err => {
                     logger.error('Error initializing PPPoE monitoring:', err);
                 });
+            }
+
+            // Initialize RX Power monitoring
+            try {
+                rxPowerMonitor.startRXPowerMonitoring();
+                logger.info('RX Power monitoring initialized');
+            } catch (err) {
+                logger.error('Error initializing RX Power monitoring:', err);
             }
         }
     }).catch(err => {
@@ -156,7 +169,7 @@ try {
     });
 
     // Mulai monitoring PPPoE lama jika dikonfigurasi (fallback)
-    if (process.env.MIKROTIK_HOST && process.env.MIKROTIK_USER && process.env.MIKROTIK_PASSWORD) {
+    if (global.appSettings.mikrotikHost && global.appSettings.mikrotikUser && global.appSettings.mikrotikPassword) {
         monitorPPPoEConnections().catch(err => {
             logger.error('Error starting legacy PPPoE monitoring:', err);
         });
@@ -164,6 +177,9 @@ try {
 } catch (error) {
     logger.error('Error initializing services:', error);
 }
+
+// Tambahkan delay yang lebih lama untuk reconnect WhatsApp
+const RECONNECT_DELAY = 30000; // 30 detik
 
 // Fungsi untuk memulai server dengan penanganan port yang sudah digunakan
 function startServer(portToUse) {
@@ -204,10 +220,8 @@ function startServer(portToUse) {
     }
 }
 
-// Pastikan port menggunakan nilai langsung dari .env
-// Reload dotenv untuk memastikan kita mendapatkan nilai terbaru dari file .env
-require('dotenv').config();
-port = parseInt(process.env.PORT, 10);
+// Mulai server dengan port dari settings.json
+const port = global.appSettings.port;
 logger.info(`Attempting to start server on configured port: ${port}`);
 
 // Mulai server dengan port dari konfigurasi

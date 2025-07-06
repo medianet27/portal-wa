@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= settings.company_header || 'Alijaya Network' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h2 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #666;
+            margin-bottom: 0;
+        }
+        
+        .customer-badge {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border: none;
+            border-radius: 15px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+            color: white;
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .admin-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .admin-link a {
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .admin-link a:hover {
+            color: #00f2fe;
+        }
+        
+        .otp-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #1976d2;
+        }
+        
+        .phone-helper {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 576px) {
+            .login-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="customer-badge">
+                <i class="fas fa-users me-2"></i>Customer Portal
+            </div>
+            <h2><%= settings.company_header || 'Alijaya Network' %></h2>
+            <p>Masuk ke Portal Customer</p>
+        </div>
+
+        <% if (error) { %>
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+            </div>
+        <% } %>
+
+        <% if (otpEnabled) { %>
+            <div class="otp-info">
+                <i class="fas fa-shield-alt me-2"></i>
+                <strong>Verifikasi OTP</strong><br>
+                Masukkan nomor pelanggan untuk mendapatkan kode OTP via WhatsApp
+            </div>
+        <% } else { %>
+            <div class="otp-info" style="background: #e8f5e8; color: #2e7d32;">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Login Langsung</strong><br>
+                Masukkan nomor pelanggan untuk masuk ke portal customer
+            </div>
+        <% } %>
+
+        <form action="/auth/customer/login" method="POST">
+            <input type="hidden" name="redirect" value="<%= redirect %>">
+
+            <div class="form-floating">
+                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Nomor Pelanggan" required>
+                <label for="phoneNumber"><i class="fas fa-phone me-2"></i>Nomor Pelanggan</label>
+                <div class="phone-helper">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Contoh: 081234567890 atau 6281234567890
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-login">
+                <% if (otpEnabled) { %>
+                    <i class="fas fa-paper-plane me-2"></i>Kirim Kode OTP
+                <% } else { %>
+                    <i class="fas fa-sign-in-alt me-2"></i>Masuk ke Portal
+                <% } %>
+            </button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

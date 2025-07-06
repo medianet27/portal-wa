@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= settings && settings.company_header ? settings.company_header : 'Alijaya' %></title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14'>🔗</text></svg>">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .main-content {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin: 1rem;
+            padding: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .status-online {
+            color: var(--success-color);
+        }
+        
+        .status-offline {
+            color: var(--danger-color);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+        }
+        
+        .stat-card.info {
+            background: linear-gradient(135deg, var(--info-color), #0891b2);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                z-index: 1050;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .main-content {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+            
+            .mobile-menu-btn {
+                display: block !important;
+            }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="btn btn-primary mobile-menu-btn position-fixed" style="top: 1rem; left: 1rem; z-index: 1060;" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white fw-bold">
+                            <i class="bi bi-wifi"></i> <%= settings && settings.company_header ? settings.company_header : 'Alijaya' %>
+                        </h4>
+                        <% if (user) { %>
+                            <small class="text-white-50">
+                                <%= (user && user.isAdmin) ? (settings && settings.footer_info ? settings.footer_info : 'Admin Panel') : 'Customer Portal' %>
+                            </small>
+                        <% } %>
+
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <%- include('../partials/sidebar') %>
+                    </ul>
+                    
+                    <!-- Device Info -->
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-25">
+                        <small class="text-white-50 d-block mb-2">Device Info</small>
+                        <div class="text-white-50 small">
+                            <div class="d-flex justify-content-between">
+                                <span>Status:</span>
+                                <span id="deviceStatus">Online</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Signal:</span>
+                                <span id="deviceSignal">Good</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Speed:</span>
+                                <span id="deviceSpeed">100M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <div class="mt-4 pt-3 border-top border-light border-opacity-25">
+                        <form action="/auth/logout" method="POST" class="d-inline w-100">
+                            <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="main-content">
+                    <%- content %>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/app.js"></script>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        // Update device info in sidebar
+        function updateDeviceInfo() {
+            fetch('/customer/api/device/info')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && !data.error) {
+                        document.getElementById('deviceStatus').textContent = data.isOnline ? 'Online' : 'Offline';
+                        document.getElementById('deviceSignal').textContent = 'Good';
+                        document.getElementById('deviceSpeed').textContent = '100M';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating device info:', error);
+                });
+        }
+
+        // Auto-refresh for real-time data
+        function autoRefresh() {
+            if (window.location.pathname.includes('/customer/')) {
+                // Update device info in sidebar
+                updateDeviceInfo();
+
+                // Auto-refresh page every 30 seconds for dashboard
+                if (window.location.pathname.includes('/dashboard')) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 30000);
+                }
+            }
+        }
+
+        // Initial load
+        updateDeviceInfo();
+
+        // Auto-refresh device info every 30 seconds
+        setInterval(() => {
+            updateDeviceInfo();
+        }, 30000);
+
+        // Initialize auto-refresh
+        autoRefresh();
+    </script>
+</body>
+</html>
