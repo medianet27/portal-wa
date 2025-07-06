@@ -242,16 +242,17 @@
       }
     }
     @media (max-width: 576px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      .table-responsive {
-        font-size: 12px;
-      }
-      .table th, .table td {
-        padding: 8px 4px;
-      }
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr); /* 2 kolom */
+      gap: 10px;
     }
+    .table-responsive {
+      font-size: 12px;
+    }
+    .table th, .table td {
+      padding: 8px 4px;
+    }
+  }
   </style>
 </head>
 <body>
