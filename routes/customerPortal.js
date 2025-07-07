@@ -207,7 +207,6 @@ async function updatePassword(phone, newPassword) {
     await axios.post(tasksUrl, {
       name: "setParameterValues",
       parameterValues: [
-        ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.KeyPassphrase", newPassword, "xsd:string"],
         ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PreSharedKey.1.KeyPassphrase", newPassword, "xsd:string"]
       ]
     }, { auth: { username, password } });
@@ -215,7 +214,6 @@ async function updatePassword(phone, newPassword) {
     await axios.post(tasksUrl, {
       name: "setParameterValues",
       parameterValues: [
-        ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.5.KeyPassphrase", newPassword, "xsd:string"],
         ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.5.PreSharedKey.1.KeyPassphrase", newPassword, "xsd:string"]
       ]
     }, { auth: { username, password } });
@@ -296,42 +294,66 @@ router.post('/otp', (req, res) => {
 router.get('/dashboard', async (req, res) => {
   const phone = req.session && req.session.phone;
   if (!phone) return res.redirect('/customer/login');
+
   const data = await getCustomerDeviceData(phone);
-  if (!data) return res.render('dashboard', { customer: { phone, ssid: '-', status: 'Tidak ditemukan', lastChange: '-' }, connectedUsers: [], notif: 'Data perangkat tidak ditemukan.' });
-  res.render('dashboard', { customer: data, connectedUsers: data.connectedUsers });
+  const notif = req.session.notif || null;
+  delete req.session.notif;
+
+  if (!data) {
+    return res.render('dashboard', {
+      customer: { phone, ssid: '-', status: 'Tidak ditemukan', lastChange: '-' },
+      connectedUsers: [],
+      notif: notif || 'Data perangkat tidak ditemukan.'
+    });
+  }
+
+  res.render('dashboard', {
+    customer: data,
+    connectedUsers: data.connectedUsers,
+    notif
+  });
 });
 
 // POST: Ganti SSID
 router.post('/change-ssid', async (req, res) => {
   const phone = req.session && req.session.phone;
   if (!phone) return res.redirect('/customer/login');
+
   const { ssid } = req.body;
   const ok = await updateSSID(phone, ssid);
+
   if (ok) {
     // Kirim notifikasi WhatsApp ke pelanggan
     const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
     const msg = `✅ *PERUBAHAN NAMA WIFI*\n\nNama WiFi Anda telah diubah menjadi:\n• WiFi 2.4GHz: ${ssid}\n• WiFi 5GHz: ${ssid}-5G\n\nSilakan hubungkan ulang perangkat Anda ke WiFi baru.`;
     try { await sendMessage(waJid, msg); } catch (e) {}
   }
-  const data = await getCustomerDeviceData(phone);
-  res.render('dashboard', { customer: data || { phone, ssid: '-', status: '-', lastChange: '-' }, connectedUsers: data ? data.connectedUsers : [], notif: ok ? 'Nama WiFi (SSID) berhasil diubah.' : 'Gagal mengubah SSID.' });
+
+  // Simpan notifikasi ke session lalu redirect
+  req.session.notif = ok ? 'Nama WiFi (SSID) berhasil diubah.' : 'Gagal mengubah SSID.';
+  res.redirect('/customer/dashboard');
 });
 
 // POST: Ganti Password
 router.post('/change-password', async (req, res) => {
   const phone = req.session && req.session.phone;
   if (!phone) return res.redirect('/customer/login');
+
   const { password } = req.body;
   const ok = await updatePassword(phone, password);
+
   if (ok) {
     // Kirim notifikasi WhatsApp ke pelanggan
     const waJid = phone.replace(/^0/, '62') + '@s.whatsapp.net';
     const msg = `✅ *PERUBAHAN PASSWORD WIFI*\n\nPassword WiFi Anda telah diubah menjadi:\n• Password Baru: ${password}\n\nSilakan hubungkan ulang perangkat Anda dengan password baru.`;
     try { await sendMessage(waJid, msg); } catch (e) {}
   }
-  const data = await getCustomerDeviceData(phone);
-  res.render('dashboard', { customer: data || { phone, ssid: '-', status: '-', lastChange: '-' }, connectedUsers: data ? data.connectedUsers : [], notif: ok ? 'Password WiFi berhasil diubah.' : 'Gagal mengubah password.' });
+
+  // Simpan notifikasi ke session lalu redirect
+  req.session.notif = ok ? 'Password WiFi berhasil diubah.' : 'Gagal mengubah password.';
+  res.redirect('/customer/dashboard');
 });
+
 
 // POST: Logout pelanggan (letakkan sebelum module.exports)
 router.post('/logout', (req, res) => {
