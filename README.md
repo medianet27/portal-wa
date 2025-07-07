@@ -1,6 +1,6 @@
 # WhatsAppBot Webportal Pelanggan Saja
 Rekening Donasi Untuk Pembanguanan Masjid
-4206 0101 2214 534 BRI an DKM BAITUR ROHMAN <br>
+# 4206 0101 2214 534 BRI an DKM BAITUR ROHMAN <br>
 
 Versi ringan dari Botlokal yang hanya menggunakan fitur WhatsApp webportal pelanggan saja
 
@@ -72,7 +72,7 @@ samakan dengan env
 ```bash
 npm start
 ```
-
+# siapkan dua nomer whatsapp 1 buat bot 1 buat admin
 Scan QR code yang muncul di terminal untuk login WhatsApp.<br>
 setelah di scan tinggal jalankan dengan PM2
 ```bash
