@@ -32,13 +32,13 @@ function getHeaderFooter() {
         const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
         
         return {
-            header: settings.company_header || 'ALIJAYA BOT MANAGEMENT ISP',
-            footer: settings.footer_info || 'Internet Tanpa Batas'
+            header: settings.company_header || '',
+            footer: settings.footer_info || ''
         };
     } catch (error) {
         return {
-            header: 'ALIJAYA BOT MANAGEMENT ISP',
-            footer: 'Internet Tanpa Batas'
+            header: '',
+            footer: ''
         };
     }
 }
