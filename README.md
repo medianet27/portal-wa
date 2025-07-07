@@ -1,12 +1,13 @@
 # WhatsAppBot Webportal Pelanggan Saja
 Rekening Donasi Untuk Pembanguanan Masjid
 # 4206 0101 2214 534 BRI an DKM BAITUR ROHMAN <br>
+Info 08194215703 ALIJAYA
 
-Versi ringan dari Botlokal yang hanya menggunakan fitur WhatsApp webportal pelanggan saja
+Versi ringan dari whatsappbot Genieacs API dan Mikrotik API yang hanya menggunakan fitur WhatsApp webportal pelanggan saja
 
 ## Persyaratan
 
-- Node.js v20+ (direkomendasikan v16+)
+- Node.js v18+ (direkomendasikan v20+)
 - npm atau yarn
 - Akses ke GenieACS API
 - Akses ke Mikrotik API (opsional)
@@ -108,4 +109,7 @@ pm2 start app-whatsapp-only.js
 - `addwan [nomor] [tipe] [mode]` - Tambah konfigurasi WAN
 - `addtag [device_id] [nomor]` - Tambahkan nomor pelanggan ke perangkat
 - `addpppoe_tag [pppoe_username] [nomor]` - Tambahkan nomor pelanggan berdasarkan PPPoE
+- `Otp On untuk mengaktifkan OTP
+- `Otp off untuk nonaktifkan OTP
+- Otp status untuk melihat status OTP
 ### Jangan lupa untuk mengkonfigurasi file .env terlebih dahulu!
