@@ -19,7 +19,7 @@ link ytb : https://www.youtube.com/shorts/qYJFQY7egFw
 apt install git curl -y
 ```
 ```
-git clone https://github.com/alijayanet/portal-wa
+git clone https://github.com/medianet27/portal-wa
 ```
 ```
 cd portal-wa
