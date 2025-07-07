@@ -2,9 +2,11 @@
 Rekening Donasi Untuk Pembanguanan Masjid
 # 4206 0101 2214 534 BRI an DKM BAITUR ROHMAN <br>
 Info 08194215703 ALIJAYA
+link group tele : https://t.me/alijayaNetAcs
+link chanell tele : https://t.me/alijayaNetwork
 
 Versi ringan dari whatsappbot Genieacs API dan Mikrotik API yang hanya menggunakan fitur WhatsApp webportal pelanggan saja
-
+link ytb : https://www.youtube.com/shorts/qYJFQY7egFw
 ## Persyaratan
 
 - Node.js v18+ (direkomendasikan v20+)
