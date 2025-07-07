@@ -8,6 +8,8 @@ require('dotenv').config();
 const pino = require('pino');
 const { logger } = require('./logger');
 const genieacsCommands = require('./genieacs-commands');
+const COMPANY_HEADER = '';
+const FOOTER_INFO = '';
 
 const {
     addHotspotUser,
@@ -102,20 +104,7 @@ function isAdminNumber(number) {
 
 // Helper untuk menambahkan header dan footer pada pesan
 function formatWithHeaderFooter(message) {
-    try {
-        // Ambil header dan footer dari settings.json
-        const header = getSetting('company_header', 'G-Net BOT MANAGEMENT ISP');
-        const footer = getSetting('footer_info', 'Internet Tanpa Batas');
-        
-        // Format pesan dengan header dan footer
-        const formattedMessage = `🏢 *${header}*\n\n${message}\n\n${footer}`;
-        
-        return formattedMessage;
-    } catch (error) {
-        console.error('Error formatting message with header/footer:', error);
-        // Fallback ke format default jika ada error
-        return `🏢 *G-Net BOT MANAGEMENT ISP*\n\n${message}\n\nInternet Tanpa Batas`;
-    }
+    return message; // Nonaktifkan header/footer, hanya kembalikan pesan asli
 }
 
 // Helper untuk mengirim pesan dengan header dan footer
@@ -381,8 +370,7 @@ async function connectToWhatsApp() {
                 // Kirim pesan ke admin bahwa bot telah terhubung
                 try {
                     // Pesan notifikasi
-                    const notificationMessage = `📱 *BOT WHATSAPP G-Net*\n\n` +
-                    `✅ *Status:* Bot telah berhasil terhubung\n` +
+                    const notificationMessage = `✅ *Status:* Bot telah berhasil terhubung\n` +
                     `📅 *Waktu:* ${connectedSince.toLocaleString()}\n\n` +
                     `💬 *Perintah Tersedia:*\n` +
                     `• Ketik *menu* untuk melihat daftar perintah\n` +
