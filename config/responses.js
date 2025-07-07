@@ -2,7 +2,7 @@
 
 // Format pesan dengan header dan footer
 function formatWithHeaderFooter(message) {
-    const COMPANY_HEADER = process.env.COMPANY_HEADER || "📱 ALIJAYA DIGITAL NETWORK 📱\n\n";
+    const COMPANY_HEADER = process.env.COMPANY_HEADER || "📱 G-Net 📱\n\n";
     const FOOTER_SEPARATOR = "\n\n━━━━━━━━━━━━━━━━━━━━━━\n";
     const FOOTER_INFO = FOOTER_SEPARATOR + (process.env.FOOTER_INFO || "Powered by Alijaya Digital Network");
     
