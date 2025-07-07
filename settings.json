@@ -1,13 +1,13 @@
 {
   "admins": [
-    "6281947215703"
+    "6281770990009"
   ],
   "admin_enabled": true,
   "admin_username": "admin",
   "admin_password": "admin",
-  "genieacs_url": "http://192.168.8.89:7557",
+  "genieacs_url": "http://172.19.6.176:7557",
   "genieacs_username": "admin",
-  "genieacs_password": "admin",
+  "genieacs_password": "tr069",
   "mikrotik_host": "192.168.8.1",
   "mikrotik_port": 8728,
   "mikrotik_user": "admin",
@@ -15,8 +15,8 @@
   "main_interface": "ether1-ISP",
   "pppoe_monitor_enable": true,
   "technician_numbers": [
-    "083807665697",
-    "082218094778"
+    "081770990009",
+    "081224828993"
   ],
   "technician_group_id": "120363029715729275@g.us",
   "whatsapp_session_path": "./whatsapp-session",
@@ -27,7 +27,7 @@
   "rx_power_critical": -30,
   "rx_power_notification_enable": false,
   "rx_power_notification_interval": 300000,
-  "company_header": "ALIJAYA BOT MANAGEMENT ISP",
+  "company_header": "G-Net",
   "footer_info": "Internet Tanpa Batas",
   "customerPortalOtp": true,
   "otp_length": 4,
