@@ -27,7 +27,7 @@
   "rx_power_critical": -30,
   "rx_power_notification_enable": false,
   "rx_power_notification_interval": 300000,
-  "company_header": "G-Net",
+  "company_header": "",
   "footer_info": "Internet Tanpa Batas",
   "customerPortalOtp": true,
   "otp_length": 4,
