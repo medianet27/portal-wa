@@ -104,7 +104,7 @@ function isAdminNumber(number) {
 function formatWithHeaderFooter(message) {
     try {
         // Ambil header dan footer dari settings.json
-        const header = getSetting('company_header', 'ALIJAYA BOT MANAGEMENT ISP');
+        const header = getSetting('company_header', 'G-Net BOT MANAGEMENT ISP');
         const footer = getSetting('footer_info', 'Internet Tanpa Batas');
         
         // Format pesan dengan header dan footer
@@ -114,7 +114,7 @@ function formatWithHeaderFooter(message) {
     } catch (error) {
         console.error('Error formatting message with header/footer:', error);
         // Fallback ke format default jika ada error
-        return `🏢 *ALIJAYA BOT MANAGEMENT ISP*\n\n${message}\n\nInternet Tanpa Batas`;
+        return `🏢 *G-Net BOT MANAGEMENT ISP*\n\n${message}\n\nInternet Tanpa Batas`;
     }
 }
 
@@ -313,7 +313,7 @@ async function connectToWhatsApp() {
         sock = makeWASocket({
             auth: state,
             logger,
-            browser: ['ALIJAYA DIGITAL NETWORK', 'Chrome', '1.0.0'],
+            browser: ['Digital Medianet27', 'Chrome', '1.0.0'],
             connectTimeoutMs: 60000,
             qrTimeout: 40000,
             defaultQueryTimeoutMs: 30000, // Timeout untuk query
@@ -381,17 +381,14 @@ async function connectToWhatsApp() {
                 // Kirim pesan ke admin bahwa bot telah terhubung
                 try {
                     // Pesan notifikasi
-                    const notificationMessage = `📱 *BOT WHATSAPP ALIJAYA NETWORK*\n\n` +
+                    const notificationMessage = `📱 *BOT WHATSAPP G-Net*\n\n` +
                     `✅ *Status:* Bot telah berhasil terhubung\n` +
                     `📅 *Waktu:* ${connectedSince.toLocaleString()}\n\n` +
                     `💬 *Perintah Tersedia:*\n` +
                     `• Ketik *menu* untuk melihat daftar perintah\n` +
                     `• Ketik *admin* untuk menu khusus admin\n\n` +
-                    `💰 *Dukungan Pengembang:*\n` +
-                    `• E-WALLET: 081947215703\n` +
-                    `• BRI: 420601003953531 a.n WARJAYA\n\n` +
                     `👏 Terima kasih telah menggunakan Aplikasi kami.\n` +
-                    `🏢 *ALIJAYA DIGITAL NETWORK*`;
+                    `🏢 *Digital Medianet27*`;
                     
                     // Kirim ke admin dari environment variable
                     const adminNumber = process.env.ADMIN_NUMBER;
@@ -782,7 +779,7 @@ async function handleHelpCommand(remoteJid, isAdmin = false) {
 
         helpMessage += `
 �� *Versi Bot:* v1.0.0
-🏢 *ALIJAYA HOTSPOT*`;
+🏢 *G-net HOTSPOT*`;
 
         await sendFormattedMessage(remoteJid, helpMessage);
         return true;
@@ -881,9 +878,9 @@ async function sendAdminMenuList(remoteJid) {
 
 ⚙️ *Pengaturan Bot:*
 ▸ *setheader [teks_header_baru]* — Ganti header pesan bot
-   Contoh: setheader ALIJAYA HOTSPOT
+   Contoh: setheader G-Net HOTSPOT
 ▸ *setfooter [teks_footer_baru]* — Ganti footer pesan bot
-   Contoh: setfooter Powered by Alijaya Digital Network
+   Contoh: setfooter Powered by Digital Medianet27
 ▸ *setadmin [nomor_admin_baru]* — Ganti admin utama
    Contoh: setadmin 6281234567890
 ▸ *settechnician [nomor1,nomor2,...]* — Ganti daftar teknisi
