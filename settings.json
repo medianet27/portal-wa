@@ -1,6 +1,6 @@
 {
   "admins": [
-    "6281770990009"
+    "6281224828993"
   ],
   "admin_enabled": true,
   "admin_username": "admin",
@@ -8,14 +8,8 @@
   "genieacs_url": "http://172.19.6.176:7557",
   "genieacs_username": "admin",
   "genieacs_password": "tr069",
-  "mikrotik_host": "192.168.8.1",
-  "mikrotik_port": 8728,
-  "mikrotik_user": "admin",
-  "mikrotik_password": "admin",
-  "main_interface": "ether1-ISP",
-  "pppoe_monitor_enable": true,
+  "pppoe_monitor_enable": false,
   "technician_numbers": [
-    "081770990009",
     "081224828993"
   ],
   "technician_group_id": "120363029715729275@g.us",
